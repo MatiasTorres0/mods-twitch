@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.utils import timezone
 # Create your models here.
 class Comando(models.Model):
     TIPO_COMANDO = (
@@ -21,8 +22,33 @@ class Comando(models.Model):
 
     def __str__(self):
         return self.nombre_comando
+
+class ModeradorManager(BaseUserManager):
+    def create_user(self, nombre_twitch, alias, password=None):
+        if not nombre_twitch:
+            raise ValueError('El moderador debe tener un nombre de Twitch')
+        
+        user = self.model(
+            nombre_twitch=nombre_twitch,
+            alias=alias,
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
     
-class Moderador(models.Model):
+    def create_superuser(self, nombre_twitch, alias, password=None):
+        user = self.create_user(
+            nombre_twitch=nombre_twitch,
+            alias=alias,
+            password=password,
+        )
+        user.is_admin = True
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+class Moderador(AbstractUser):
     MODERADOR = (
         ('ELCILANTROUWU', 'elcilantrouwu'),
         ('JOSHUAKOMODO', 'joshuakomodo'),
@@ -32,12 +58,26 @@ class Moderador(models.Model):
         ('POIYUTE', 'PoiYuTe'),
         ('CHACHOYVT', 'ChachoyVT'),
     )
+    
+    # Eliminar campos heredados que no necesitamos
+    username = None
+    first_name = None
+    last_name = None
+    
+    # Nuevos campos
     nombre_twitch = models.CharField(max_length=20, choices=MODERADOR, unique=True)
+    alias = models.CharField(max_length=30, unique=True, default='')
     activo = models.BooleanField(default=True)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+    password = models.CharField(max_length=128, default='changeme')
+    # Configuración para autenticación
+    USERNAME_FIELD = 'nombre_twitch'
+    REQUIRED_FIELDS = ['alias']
+    
+    objects = ModeradorManager()
     
     def __str__(self):
-        return self.nombre_twitch
+        return self.alias
     
     def clean(self):
         # Verificar si este es un objeto existente (ya tiene ID)
@@ -48,7 +88,7 @@ class Moderador(models.Model):
             if original.nombre_twitch != self.nombre_twitch:
                 raise ValidationError('El nombre de Twitch no puede ser modificado después de la creación.')
         super().clean()
-    
+
 class anuncios(models.Model):
     mensaje = models.CharField(max_length=200)
     fecha = models.DateTimeField(auto_now_add=True)
