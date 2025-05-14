@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Moderadores - Comandos</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --twitch-purple: #9146FF;
+            --twitch-dark: #18181B;
+            --twitch-light: #F0F0FF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevenir scroll horizontal */
+        }
+        
+        /* Optimización de selectores para mejorar rendimiento */
+        .navbar {
+            background-color: var(--twitch-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Asegurar que la barra de navegación esté siempre visible */
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .navbar-brand span {
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de reglas CSS para reducir redundancia */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: all 0.2s; /* Reducido de 0.3s para mejor rendimiento */
+            border-radius: 5px;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: var(--twitch-purple);
+        }
+        
+        .nav-link i {
+            margin-right: 5px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .footer {
+            background-color: var(--twitch-dark);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        .page-header {
+            background-color: var(--twitch-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--twitch-purple);
+        }
+        
+        .btn-twitch {
+            background-color: var(--twitch-purple);
+            border-color: var(--twitch-purple);
+            color: white;
+            transition: all 0.2s; /* Reducido tiempo de transición */
+        }
+        
+        .btn-twitch:hover {
+            background-color: #7d3bdb;
+            border-color: #7d3bdb;
+            color: white;
+        }
+        
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--twitch-light);
+        }
+        
+        .dropdown-item i {
+            margin-right: 8px;
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de tarjetas de comandos */
+        .command-card {
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+            transition: transform 0.2s, box-shadow 0.2s; /* Reducido tiempo de transición */
+            margin-bottom: 1.5rem;
+            border: none;
+            overflow: hidden;
+            will-change: transform; /* Optimización para animaciones */
+        }
+        
+        .command-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Reducida la intensidad de la sombra */
+        }
+        
+        .command-header {
+            background-color: var(--twitch-purple);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .command-body {
+            padding: 1.5rem;
+        }
+        
+        .command-name {
+            font-family: 'Courier New', monospace;
+            background-color: #f1f1f1;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--twitch-purple);
+        }
+        
+        .command-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .search-bar {
+            margin-bottom: 2rem;
+        }
+        
+        .command-category {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            background-color: #e9ecef;
+        }
+        
+        .category-mod {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .category-info {
+            background-color: #cff4fc;
+            color: #055160;
+        }
+        
+        .category-fun {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        
+        /* Optimización del botón flotante */
+        .add-command-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--twitch-purple);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Reducida la intensidad de la sombra */
+            transition: all 0.2s; /* Reducido tiempo de transición */
+            z-index: 1000;
+            will-change: transform; /* Optimización para animaciones */
+        }
+        
+        .add-command-btn:hover {
+            transform: scale(1.1);
+            background-color: #7d3bdb;
+            color: white;
+        }
+        
+        .filters {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+        }
+        
+        /* Media queries para mejorar responsividad */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1rem;
+            }
+            
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .filters {
+                padding: 1rem;
+            }
+            
+            .command-body {
+                padding: 1.2rem;
+            }
+            
+            .command-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .command-actions .btn {
+                margin-bottom: 0.5rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.8rem !important;
+                margin: 0.1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem 0;
+            }
+            
+            .command-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .command-category {
+                margin-top: 0.5rem;
+                margin-left: 0;
+            }
+            
+            .add-command-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+        
+        /* Optimización para carga diferida de imágenes */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Mejora de accesibilidad */
+        .btn, .nav-link, a {
+            transition: all 0.2s;
+        }
+        
+        .btn:focus, .nav-link:focus, a:focus {
+            outline: 2px solid var(--twitch-purple);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">
+                <i class="fab fa-twitch"></i> Panel<span>Mods</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio' %}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'comandos' %}">
+                            <i class="fas fa-terminal"></i> Comandos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'protocolos' %}">
+                            <i class="fas fa-shield-alt"></i> Protocolos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'anuncios' %}">
+                            <i class="fas fa-bullhorn"></i> Anuncios
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Mi Cuenta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Encabezado de la página -->
+            <div class="page-header">
+                <h2><i class="fas fa-terminal"></i> Gestión de Comandos</h2>
+                <p class="mb-0">Administra los comandos disponibles para el chat. Puedes crear, editar o eliminar comandos según sea necesario.</p>
+            </div>
+            
+            <!-- Filtros y búsqueda -->
+            <div class="filters">
+                <div class="row">
+                    <div class="col-lg-8 col-md-7 col-sm-12 mb-3 mb-md-0">
+                        <div class="input-group search-bar">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Buscar comandos...">
+                            <button class="btn btn-twitch" type="button">Buscar</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-5 col-sm-12">
+                        <select class="form-select">
+                            <option selected>Todas las categorías</option>
+                            <option value="mod">Moderación</option>
+                            <option value="info">Información</option>
+                            <option value="fun">Diversión</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lista de comandos -->
+            <div class="row">
+                <!-- Comando 1 -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card command-card h-100">
+                        <div class="command-header">
+                            <span>!ban</span>
+                            <span class="command-category category-mod">Moderación</span>
+                        </div>
+                        <div class="command-body">
+                            <p><strong>Uso:</strong> <span class="command-name">!ban @usuario [razón]</span></p>
+                            <p><strong>Descripción:</strong> Banea permanentemente a un usuario del chat.</p>
+                            <p><strong>Permisos:</strong> Moderadores, VIPs</p>
+                            <div class="command-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comando 2 -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card command-card h-100">
+                        <div class="command-header">
+                            <span>!timeout</span>
+                            <span class="command-category category-mod">Moderación</span>
+                        </div>
+                        <div class="command-body">
+                            <p><strong>Uso:</strong> <span class="command-name">!timeout @usuario [duración] [razón]</span></p>
+                            <p><strong>Descripción:</strong> Silencia temporalmente a un usuario en el chat.</p>
+                            <p><strong>Permisos:</strong> Moderadores, VIPs</p>
+                            <div class="command-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comando 3 -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card command-card h-100">
+                        <div class="command-header">
+                            <span>!horario</span>
+                            <span class="command-category category-info">Información</span>
+                        </div>
+                        <div class="command-body">
+                            <p><strong>Uso:</strong> <span class="command-name">!horario</span></p>
+                            <p><strong>Descripción:</strong> Muestra el horario de streams de la semana.</p>
+                            <p><strong>Permisos:</strong> Todos</p>
+                            <div class="command-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comando 4 -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card command-card h-100">
+                        <div class="command-header">
+                            <span>!redes</span>
+                            <span class="command-category category-info">Información</span>
+                        </div>
+                        <div class="command-body">
+                            <p><strong>Uso:</strong> <span class="command-name">!redes</span></p>
+                            <p><strong>Descripción:</strong> Muestra los enlaces a las redes sociales.</p>
+                            <p><strong>Permisos:</strong> Todos</p>
+                            <div class="command-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comando 5 -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card command-card h-100">
+                        <div class="command-header">
+                            <span>!dado</span>
+                            <span class="command-category category-fun">Diversión</span>
+                        </div>
+                        <div class="command-body">
+                            <p><strong>Uso:</strong> <span class="command-name">!dado [número]</span></p>
+                            <p><strong>Descripción:</strong> Lanza un dado con el número de caras especificado.</p>
+                            <p><strong>Permisos:</strong> Todos</p>
+                            <div class="command-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botón flotante para añadir comando -->
+            <a href="#" class="add-command-btn" title="Añadir nuevo comando" aria-label="Añadir nuevo comando">
+                <i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Panel de Moderadores | Desarrollado para la comunidad de Twitch</p>
+        </div>
+    </footer>
+
+    <!-- Scripts optimizados -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    
+    <!-- Script para mejorar el rendimiento -->
+    <script>
+        // Optimización de carga de página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Añadir clase para animaciones después de que la página esté cargada
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 100);
+            
+            // Optimización de eventos de hover en móviles
+            if ('ontouchstart' in document.documentElement) {
+                document.body.classList.add('touch-device');
+            }
+            
+            // Mejora de rendimiento para búsqueda
+            const searchInput = document.querySelector('.search-bar input');
+            if (searchInput) {
+                let debounceTimer;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        // Aquí iría la lógica de búsqueda
+                        console.log('Buscando: ' + searchInput.value);
+                    }, 300);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -135,6 +135,21 @@
     .fadeIn {
       animation-name: fadeIn;
     }
+    .login-help {
+      background-color: #f0f8ff;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #9146FF;
+    }
+    .login-help p {
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+    .login-help i {
+      color: #9146FF;
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -147,6 +162,12 @@
       <h3 class="text-center m-0">Iniciar Sesión</h3>
     </div>
     <div class="card-body">
+      <!-- Nuevo bloque de ayuda -->
+      <div class="login-help">
+        <p><i class="fas fa-info-circle"></i> Ingresa tu nombre de Twitch <strong>exactamente</strong> como lo seleccionaste durante el registro.</p>
+        <p><i class="fas fa-exclamation-triangle"></i> El nombre es <strong>en MAYUSCULAS</strong>.</p>
+      </div>
+      
       <form method="post">
         {% csrf_token %}
         
@@ -156,7 +177,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text"><i class="fas fa-at twitch-color"></i></span>
             </div>
-            <input type="text" name="username" class="form-control with-icon" id="id_username" placeholder="Tu nombre en Twitch" required>
+            <input type="text" name="username" class="form-control with-icon" id="id_username" placeholder="Tu nombre exacto en Twitch" required>
           </div>
         </div>
         
@@ -175,7 +196,15 @@
         
         {% if form.errors %}
           <div class="alert alert-danger">
-            <p class="m-0"><i class="fas fa-exclamation-circle"></i> Tu nombre de usuario y contraseña no coinciden. Inténtalo de nuevo.</p>
+            <p class="m-0"><i class="fas fa-exclamation-circle"></i> Tu nombre de Twitch y contraseña no coinciden. Inténtalo de nuevo.</p>
+          </div>
+        {% endif %}
+        
+        {% if messages %}
+          <div class="alert alert-danger">
+            {% for message in messages %}
+              <p class="m-0"><i class="fas fa-exclamation-circle"></i> {{ message }}</p>
+            {% endfor %}
           </div>
         {% endif %}
         

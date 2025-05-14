@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Moderadores - Protocolos</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --twitch-purple: #9146FF;
+            --twitch-dark: #18181B;
+            --twitch-light: #F0F0FF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevenir scroll horizontal */
+        }
+        
+        /* Optimización de selectores para mejorar rendimiento */
+        .navbar {
+            background-color: var(--twitch-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Asegurar que la barra de navegación esté siempre visible */
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .navbar-brand span {
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de reglas CSS para reducir redundancia */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: all 0.2s; /* Reducido de 0.3s para mejor rendimiento */
+            border-radius: 5px;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: var(--twitch-purple);
+        }
+        
+        .nav-link i {
+            margin-right: 5px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .footer {
+            background-color: var(--twitch-dark);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        .page-header {
+            background-color: var(--twitch-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--twitch-purple);
+        }
+        
+        .btn-twitch {
+            background-color: var(--twitch-purple);
+            border-color: var(--twitch-purple);
+            color: white;
+            transition: all 0.2s; /* Reducido tiempo de transición */
+        }
+        
+        .btn-twitch:hover {
+            background-color: #7d3bdb;
+            border-color: #7d3bdb;
+            color: white;
+        }
+        
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--twitch-light);
+        }
+        
+        .dropdown-item i {
+            margin-right: 8px;
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de tarjetas de protocolos */
+        .protocol-card {
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+            transition: transform 0.2s, box-shadow 0.2s; /* Reducido tiempo de transición */
+            margin-bottom: 1.5rem;
+            border: none;
+            overflow: hidden;
+            will-change: transform; /* Optimización para animaciones */
+        }
+        
+        .protocol-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Reducida la intensidad de la sombra */
+        }
+        
+        .protocol-header {
+            background-color: var(--twitch-purple);
+            color: white;
+            padding: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .protocol-body {
+            padding: 1.5rem;
+        }
+        
+        .protocol-footer {
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .protocol-severity {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .severity-low {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .severity-medium {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        
+        .severity-high {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        
+        .severity-critical {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .protocol-step {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .protocol-step:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--twitch-purple);
+        }
+        
+        .protocol-step:after {
+            content: "";
+            position: absolute;
+            left: 3px;
+            top: 0.8rem;
+            width: 2px;
+            height: calc(100% + 0.5rem);
+            background-color: #e0e0e0;
+        }
+        
+        .protocol-step:last-child:after {
+            display: none;
+        }
+        
+        .protocol-note {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--twitch-purple);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .protocol-note i {
+            color: var(--twitch-purple);
+            margin-right: 0.5rem;
+        }
+        
+        .protocol-commands {
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto; /* Permitir scroll horizontal para comandos largos */
+        }
+        
+        .protocol-commands code {
+            color: var(--twitch-purple);
+            background-color: rgba(145, 70, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            white-space: nowrap; /* Evitar que los comandos se rompan */
+        }
+        
+        .protocol-tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        /* Media queries para mejorar responsividad */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1rem;
+            }
+            
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .filters {
+                padding: 1rem;
+            }
+            
+            .protocol-body {
+                padding: 1.2rem;
+            }
+            
+            .protocol-header h4 {
+                font-size: 1.2rem;
+            }
+            
+            .protocol-commands {
+                padding: 0.8rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.8rem !important;
+                margin: 0.1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem 0;
+            }
+            
+            .protocol-header {
+                padding: 1rem;
+            }
+            
+            .protocol-header h4 {
+                font-size: 1.1rem;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .protocol-severity {
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+            
+            .protocol-step {
+                padding-left: 1.2rem;
+            }
+            
+            .protocol-step:before {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .protocol-footer {
+                padding: 0.8rem 1rem;
+            }
+        }
+        
+        /* Optimización para carga diferida de imágenes */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Mejora de accesibilidad */
+        .btn, .nav-link, a {
+            transition: all 0.2s;
+        }
+        
+        .btn:focus, .nav-link:focus, a:focus {
+            outline: 2px solid var(--twitch-purple);
+            outline-offset: 2px;
+        }
+        
+        /* Optimización de búsqueda */
+        .search-protocols {
+            margin-bottom: 2rem;
+        }
+        
+        .filters {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">
+                <i class="fab fa-twitch"></i> Panel<span>Mods</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio' %}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'comandos' %}">
+                            <i class="fas fa-terminal"></i> Comandos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'protocolos' %}">
+                            <i class="fas fa-shield-alt"></i> Protocolos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'anuncios' %}">
+                            <i class="fas fa-bullhorn"></i> Anuncios
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Mi Cuenta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Encabezado de la página -->
+            <div class="page-header">
+                <h2><i class="fas fa-shield-alt"></i> Protocolos de Moderación</h2>
+                <p class="mb-0">Guías y procedimientos estandarizados para manejar diferentes situaciones en el chat. Sigue estos protocolos para mantener una moderación consistente y efectiva.</p>
+            </div>
+            
+            <!-- Filtros y búsqueda -->
+            <div class="filters">
+                <div class="row g-3">
+                    <div class="col-lg-8 col-md-7 col-sm-12">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Buscar protocolos...">
+                            <button class="btn btn-twitch" type="button">Buscar</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-5 col-sm-12">
+                        <select class="form-select">
+                            <option selected>Todos los protocolos</option>
+                            <option value="critical">Severidad crítica</option>
+                            <option value="high">Severidad alta</option>
+                            <option value="medium">Severidad media</option>
+                            <option value="low">Severidad baja</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Protocolos -->
+            <div class="row">
+                <!-- Protocolo 1: Spam -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card protocol-card h-100">
+                        <div class="protocol-header">
+                            <h4>Protocolo Anti-Spam <span class="protocol-severity severity-medium">Severidad Media</span></h4>
+                        </div>
+                        <div class="protocol-body">
+                            <p><strong>Descripción:</strong> Procedimiento para manejar usuarios que envían mensajes repetitivos o no relacionados con el stream.</p>
+                            
+                            <h5 class="mt-4">Pasos a seguir:</h5>
+                            <div class="protocol-step">
+                                <p><strong>1. Primera ocurrencia:</strong> Advertencia verbal en el chat.</p>
+                                <div class="protocol-commands">
+                                    Mensaje sugerido: <code>@usuario Por favor, evita enviar mensajes repetitivos. Gracias por tu comprensión.</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>2. Segunda ocurrencia:</strong> Timeout de 5 minutos.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/timeout @usuario 300 Spam en el chat</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>3. Tercera ocurrencia:</strong> Timeout de 10 minutos y advertencia final.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/timeout @usuario 600 Spam reiterado - Advertencia final</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>4. Cuarta ocurrencia:</strong> Ban permanente.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/ban @usuario Spam persistente después de múltiples advertencias</code>
+                                </div>
+                            </div>
+                            
+                            <div class="protocol-note">
+                                <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Si el spam es extremadamente agresivo o incluye enlaces maliciosos, se puede saltar directamente al paso 3 o 4.
+                            </div>
+                        </div>
+                        <div class="protocol-footer">
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Spam</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Chat</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Moderación</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Protocolo 2: Lenguaje inapropiado -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card protocol-card h-100">
+                        <div class="protocol-header">
+                            <h4>Protocolo de Lenguaje <span class="protocol-severity severity-high">Severidad Alta</span></h4>
+                        </div>
+                        <div class="protocol-body">
+                            <p><strong>Descripción:</strong> Procedimiento para manejar usuarios que utilizan lenguaje ofensivo, discriminatorio o inapropiado.</p>
+                            
+                            <h5 class="mt-4">Pasos a seguir:</h5>
+                            <div class="protocol-step">
+                                <p><strong>1. Primera ocurrencia leve:</strong> Advertencia verbal y eliminación del mensaje.</p>
+                                <div class="protocol-commands">
+                                    Mensaje sugerido: <code>@usuario Por favor, cuida tu lenguaje en el chat. Este es un espacio para todos.</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>2. Ocurrencia moderada o segunda leve:</strong> Timeout de 10 minutos.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/timeout @usuario 600 Lenguaje inapropiado</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>3. Ocurrencia grave o reiteración:</strong> Timeout de 1 hora.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/timeout @usuario 3600 Lenguaje ofensivo reiterado</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>4. Lenguaje extremadamente ofensivo o persistencia:</strong> Ban permanente.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/ban @usuario Lenguaje discriminatorio/ofensivo persistente</code>
+                                </div>
+                            </div>
+                            
+                            <div class="protocol-note">
+                                <i class="fas fa-exclamation-triangle"></i> <strong>Importante:</strong> El lenguaje discriminatorio por raza, género, orientación sexual, religión o discapacidad debe tratarse con tolerancia cero y puede resultar en un ban inmediato.
+                            </div>
+                        </div>
+                        <div class="protocol-footer">
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Lenguaje</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Ofensivo</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Tolerancia Cero</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Protocolo 3: Raid hostil -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card protocol-card h-100">
+                        <div class="protocol-header">
+                            <h4>Protocolo Anti-Raid <span class="protocol-severity severity-critical">Severidad Crítica</span></h4>
+                        </div>
+                        <div class="protocol-body">
+                            <p><strong>Descripción:</strong> Procedimiento para manejar raids hostiles o coordinados que buscan interrumpir el stream.</p>
+                            
+                            <h5 class="mt-4">Pasos a seguir:</h5>
+                            <div class="protocol-step">
+                                <p><strong>1. Identificación:</strong> Reconocer patrones de mensajes similares de múltiples cuentas nuevas.</p>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>2. Activación de modo seguidor:</strong> Activar inmediatamente el modo seguidor y/o modo lento.</p>
+                                <div class="protocol-commands">
+                                    Comandos: <code>/followers 1d</code> y <code>/slow 30</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>3. Comunicación:</strong> Informar al streamer discretamente (por Discord si es posible).</p>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>4. Baneos:</strong> Banear a los usuarios identificados como parte del raid.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/ban @usuario Participación en raid hostil</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>5. Desactivación:</strong> Una vez controlada la situación, desactivar gradualmente los modos restrictivos.</p>
+                                <div class="protocol-commands">
+                                    Comandos: <code>/followersoff</code> y <code>/slowoff</code>
+                                </div>
+                            </div>
+                            
+                            <div class="protocol-note">
+                                <i class="fas fa-exclamation-circle"></i> <strong>Crítico:</strong> En caso de raid extremadamente hostil, considerar activar el modo solo emotes (<code>/emoteonly</code>) o incluso finalizar la transmisión si es necesario.
+                            </div>
+                        </div>
+                        <div class="protocol-footer">
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Raid</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Emergencia</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Coordinación</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Protocolo 4: Promoción no autorizada -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card protocol-card h-100">
+                        <div class="protocol-header">
+                            <h4>Protocolo Anti-Promoción <span class="protocol-severity severity-low">Severidad Baja</span></h4>
+                        </div>
+                        <div class="protocol-body">
+                            <p><strong>Descripción:</strong> Procedimiento para manejar usuarios que promocionan sus propios canales o contenido sin autorización.</p>
+                            
+                            <h5 class="mt-4">Pasos a seguir:</h5>
+                            <div class="protocol-step">
+                                <p><strong>1. Primera ocurrencia:</strong> Eliminar el mensaje y advertir en privado.</p>
+                                <div class="protocol-commands">
+                                    Mensaje sugerido: <code>@usuario Por favor, no promociones tu canal/contenido sin permiso del streamer. Gracias.</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>2. Segunda ocurrencia:</strong> Timeout de 5 minutos.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/timeout @usuario 300 Autopromoción no autorizada</code>
+                                </div>
+                            </div>
+                            <div class="protocol-step">
+                                <p><strong>3. Reiteración:</strong> Timeout de 15 minutos.</p>
+                                <div class="protocol-commands">
+                                    Comando: <code>/timeout @usuario 900 Autopromoción reiterada</code>
+                                </div>
+                            </div>
+                            
+                            <div class="protocol-note">
+                                <i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> Distinguir entre promoción agresiva y menciones casuales. Las menciones casuales de contenido propio en contexto de una conversación pueden ser aceptables.
+                            </div>
+                        </div>
+                        <div class="protocol-footer">
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Promoción</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Enlaces</span>
+                            <span class="protocol-tag"><i class="fas fa-tag"></i> Publicidad</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Panel de Moderadores | Desarrollado para la comunidad de Twitch</p>
+        </div>
+    </footer>
+
+    <!-- Scripts optimizados -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    
+    <!-- Script para mejorar el rendimiento -->
+    <script>
+        // Optimización de carga de página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Añadir clase para animaciones después de que la página esté cargada
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 100);
+            
+            // Optimización de eventos de hover en móviles
+            if ('ontouchstart' in document.documentElement) {
+                document.body.classList.add('touch-device');
+            }
+            
+            // Mejora de rendimiento para búsqueda
+            const searchInput = document.querySelector('.filters input');
+            if (searchInput) {
+                let debounceTimer;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        // Aquí iría la lógica de búsqueda
+                        console.log('Buscando: ' + searchInput.value);
+                    }, 300);
+                });
+            }
+            
+            // Filtrado de protocolos por severidad
+            const severityFilter = document.querySelector('.filters select');
+            if (severityFilter) {
+                severityFilter.addEventListener('change', function() {
+                    const selectedValue = this.value;
+                    console.log('Filtrando por severidad: ' + selectedValue);
+                    // Aquí iría la lógica de filtrado
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Moderadores - Inicio</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --twitch-purple: #9146FF;
+            --twitch-dark: #18181B;
+            --twitch-light: #F0F0FF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevenir scroll horizontal */
+        }
+        
+        /* Optimización de selectores para mejorar rendimiento */
+        .navbar {
+            background-color: var(--twitch-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Asegurar que la barra de navegación esté siempre visible */
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .navbar-brand span {
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de reglas CSS para reducir redundancia */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: all 0.2s; /* Reducido de 0.3s para mejor rendimiento */
+            border-radius: 5px;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: var(--twitch-purple);
+        }
+        
+        .nav-link i {
+            margin-right: 5px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        /* Optimización de tarjetas para mejor rendimiento en móviles */
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+            transition: transform 0.2s, box-shadow 0.2s; /* Reducido tiempo de transición */
+            height: 100%;
+            border: none;
+            overflow: hidden;
+            will-change: transform; /* Optimización para animaciones */
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Reducida la intensidad de la sombra */
+        }
+        
+        .card-header {
+            background-color: var(--twitch-purple);
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: none;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--twitch-purple);
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            background-color: var(--twitch-dark);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        .user-welcome {
+            background-color: var(--twitch-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--twitch-purple);
+        }
+        
+        /* Botones optimizados */
+        .btn-twitch {
+            background-color: var(--twitch-purple);
+            border-color: var(--twitch-purple);
+            color: white;
+            transition: all 0.2s; /* Reducido tiempo de transición */
+        }
+        
+        .btn-twitch:hover {
+            background-color: #7d3bdb;
+            border-color: #7d3bdb;
+            color: white;
+        }
+        
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--twitch-light);
+        }
+        
+        .dropdown-item i {
+            margin-right: 8px;
+            color: var(--twitch-purple);
+        }
+        
+        /* Media queries para mejorar responsividad */
+        @media (max-width: 768px) {
+            .user-welcome {
+                padding: 1rem;
+            }
+            
+            .user-welcome h2 {
+                font-size: 1.5rem;
+            }
+            
+            .card-icon {
+                font-size: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.8rem !important;
+                margin: 0.1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem 0;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .user-welcome h2 {
+                font-size: 1.3rem;
+            }
+            
+            .card-icon {
+                font-size: 1.8rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Optimización para carga diferida de imágenes */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Mejora de accesibilidad */
+        .btn, .nav-link, a {
+            transition: all 0.2s;
+        }
+        
+        .btn:focus, .nav-link:focus, a:focus {
+            outline: 2px solid var(--twitch-purple);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">
+                <i class="fab fa-twitch"></i> Panel<span>Mods</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'inicio' %}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'comandos' %}">
+                            <i class="fas fa-terminal"></i> Comandos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'protocolos' %}">
+                            <i class="fas fa-shield-alt"></i> Protocolos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'anuncios' %}">
+                            <i class="fas fa-bullhorn"></i> Anuncios
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Mi Cuenta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Mensaje de bienvenida -->
+            <div class="user-welcome">
+                <h2><i class="fas fa-hand-peace"></i> ¡Bienvenido al Panel de Moderadores!</h2>
+                <p class="mb-0">Desde aquí podrás gestionar comandos, revisar protocolos y acceder a todas las herramientas necesarias para tu labor como moderador.</p>
+            </div>
+            
+            <!-- Tarjetas de acceso rápido -->
+            <h3 class="mb-4">Acceso Rápido</h3>
+            <div class="row g-4">
+                <!-- Tarjetas optimizadas con atributos de carga diferida -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            Comandos
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="card-icon">
+                                <i class="fas fa-terminal"></i>
+                            </div>
+                            <h5 class="card-title">Gestión de Comandos</h5>
+                            <p class="card-text">Administra los comandos del chat, crea nuevos o modifica los existentes.</p>
+                            <a href="{% url 'comandos' %}" class="btn btn-twitch">Ir a Comandos</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            Protocolos
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="card-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h5 class="card-title">Protocolos de Moderación</h5>
+                            <p class="card-text">Consulta los protocolos establecidos para diferentes situaciones en el chat.</p>
+                            <a href="{% url 'protocolos' %}" class="btn btn-twitch">Ver Protocolos</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            Anuncios
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="card-icon">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <h5 class="card-title">Anuncios del Canal</h5>
+                            <p class="card-text">Mantente informado sobre las últimas novedades y eventos importantes del canal.</p>
+                            <a href="{% url 'anuncios' %}" class="btn btn-twitch">Ver Anuncios</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Panel de Moderadores | Desarrollado para la comunidad de Twitch</p>
+        </div>
+    </footer>
+
+    <!-- Scripts optimizados -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    
+    <!-- Script para mejorar el rendimiento -->
+    <script>
+        // Optimización de carga de página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Añadir clase para animaciones después de que la página esté cargada
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 100);
+            
+            // Optimización de eventos de hover en móviles
+            if ('ontouchstart' in document.documentElement) {
+                document.body.classList.add('touch-device');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Moderadores - Anuncios</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --twitch-purple: #9146FF;
+            --twitch-dark: #18181B;
+            --twitch-light: #F0F0FF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevenir scroll horizontal */
+        }
+        
+        /* Optimización de selectores para mejorar rendimiento */
+        .navbar {
+            background-color: var(--twitch-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Asegurar que la barra de navegación esté siempre visible */
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .navbar-brand span {
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de reglas CSS para reducir redundancia */
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: all 0.2s; /* Reducido de 0.3s para mejor rendimiento */
+            border-radius: 5px;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: var(--twitch-purple);
+        }
+        
+        .nav-link i {
+            margin-right: 5px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .footer {
+            background-color: var(--twitch-dark);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        .page-header {
+            background-color: var(--twitch-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--twitch-purple);
+        }
+        
+        .btn-twitch {
+            background-color: var(--twitch-purple);
+            border-color: var(--twitch-purple);
+            color: white;
+            transition: all 0.2s; /* Reducido tiempo de transición */
+        }
+        
+        .btn-twitch:hover {
+            background-color: #7d3bdb;
+            border-color: #7d3bdb;
+            color: white;
+        }
+        
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--twitch-light);
+        }
+        
+        .dropdown-item i {
+            margin-right: 8px;
+            color: var(--twitch-purple);
+        }
+        
+        /* Optimización de tarjetas de anuncios */
+        .announcement-card {
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+            transition: transform 0.2s, box-shadow 0.2s; /* Reducido tiempo de transición */
+            margin-bottom: 1.5rem;
+            border: none;
+            overflow: hidden;
+            will-change: transform; /* Optimización para animaciones */
+        }
+        
+        .announcement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Reducida la intensidad de la sombra */
+        }
+        
+        .announcement-header {
+            background-color: var(--twitch-purple);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+        }
+        
+        .announcement-body {
+            padding: 1.5rem;
+        }
+        
+        .announcement-footer {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .announcement-date {
+            font-style: italic;
+        }
+        
+        .announcement-priority {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .priority-low {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .priority-medium {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        
+        .priority-high {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        
+        .announcement-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        /* Optimización del botón flotante */
+        .add-announcement-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--twitch-purple);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Reducida la intensidad de la sombra */
+            transition: all 0.2s; /* Reducido tiempo de transición */
+            z-index: 1000;
+            will-change: transform; /* Optimización para animaciones */
+        }
+        
+        .add-announcement-btn:hover {
+            transform: scale(1.1);
+            background-color: #7d3bdb;
+            color: white;
+        }
+        
+        .filters {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
+        }
+        
+        .announcement-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .badge-new {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .badge-pinned {
+            background-color: #cff4fc;
+            color: #055160;
+        }
+        
+        /* Media queries para mejorar responsividad */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1rem;
+            }
+            
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .filters {
+                padding: 1rem;
+            }
+            
+            .announcement-body {
+                padding: 1.2rem;
+            }
+            
+            .announcement-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .announcement-actions .btn {
+                margin-bottom: 0.5rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.8rem !important;
+                margin: 0.1rem;
+            }
+            
+            .announcement-header h4 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem 0;
+            }
+            
+            .announcement-header {
+                padding: 0.8rem;
+            }
+            
+            .announcement-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .announcement-badge {
+                margin-top: 0.5rem;
+                margin-left: 0;
+            }
+            
+            .announcement-priority {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                display: block;
+            }
+            
+            .add-announcement-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+            
+            .announcement-footer .d-flex {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Optimización para carga diferida de imágenes */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Mejora de accesibilidad */
+        .btn, .nav-link, a {
+            transition: all 0.2s;
+        }
+        
+        .btn:focus, .nav-link:focus, a:focus {
+            outline: 2px solid var(--twitch-purple);
+            outline-offset: 2px;
+        }
+        
+        /* Optimización de paginación */
+        .pagination {
+            margin-top: 2rem;
+        }
+        
+        .page-link {
+            color: var(--twitch-purple);
+            border-radius: 5px;
+            margin: 0 2px;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--twitch-purple);
+            border-color: var(--twitch-purple);
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">
+                <i class="fab fa-twitch"></i> Panel<span>Mods</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio' %}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'comandos' %}">
+                            <i class="fas fa-terminal"></i> Comandos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'protocolos' %}">
+                            <i class="fas fa-shield-alt"></i> Protocolos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'anuncios' %}">
+                            <i class="fas fa-bullhorn"></i> Anuncios
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Mi Cuenta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Encabezado de la página -->
+            <div class="page-header">
+                <h2><i class="fas fa-bullhorn"></i> Anuncios del Canal</h2>
+                <p class="mb-0">Mantente informado sobre las últimas novedades, eventos y cambios importantes para el equipo de moderación.</p>
+            </div>
+            
+            <!-- Filtros y búsqueda -->
+            <div class="filters">
+                <div class="row g-3">
+                    <div class="col-lg-8 col-md-7 col-sm-12">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Buscar anuncios...">
+                            <button class="btn btn-twitch" type="button">Buscar</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-5 col-sm-12">
+                        <select class="form-select">
+                            <option selected>Todos los anuncios</option>
+                            <option value="high">Prioridad alta</option>
+                            <option value="medium">Prioridad media</option>
+                            <option value="low">Prioridad baja</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lista de anuncios -->
+            <div class="row">
+                <!-- Anuncio 1 - Pinned -->
+                <div class="col-12">
+                    <div class="card announcement-card">
+                        <div class="announcement-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="m-0">Actualización de Reglas del Canal <span class="announcement-priority priority-high">Prioridad Alta</span></h4>
+                                <span class="announcement-badge badge-pinned"><i class="fas fa-thumbtack"></i> Fijado</span>
+                            </div>
+                        </div>
+                        <div class="announcement-body">
+                            <p>Estimado equipo de moderación:</p>
+                            <p>Hemos actualizado las reglas del canal para mejorar la experiencia de todos los espectadores. Los cambios principales son:</p>
+                            <ul>
+                                <li>Tolerancia cero para comentarios discriminatorios de cualquier tipo</li>
+                                <li>Nuevas directrices sobre enlaces externos en el chat</li>
+                                <li>Actualización de los tiempos de timeout para infracciones repetidas</li>
+                            </ul>
+                            <p>Por favor, familiarícense con estas nuevas reglas lo antes posible. Pueden encontrar el documento completo en la sección de Protocolos.</p>
+                            <p>Gracias por su dedicación y compromiso con nuestra comunidad.</p>
+                            
+                            <div class="announcement-actions">
+                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> Ver detalles</button>
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-bell"></i> Marcar como leído</button>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-user"></i> Publicado por: Admin</span>
+                                <span class="announcement-date"><i class="far fa-calendar-alt"></i> 15 de Junio, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Anuncio 2 - New -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card announcement-card h-100">
+                        <div class="announcement-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="m-0">Evento Especial: Maratón de 24 Horas <span class="announcement-priority priority-medium">Prioridad Media</span></h4>
+                                <span class="announcement-badge badge-new"><i class="fas fa-star"></i> Nuevo</span>
+                            </div>
+                        </div>
+                        <div class="announcement-body">
+                            <p>¡Atención moderadores!</p>
+                            <p>El próximo fin de semana realizaremos un stream especial de 24 horas. Necesitamos coordinar turnos de moderación para asegurar que el chat esté cubierto durante todo el evento.</p>
+                            <p>Por favor, indiquen su disponibilidad en el documento compartido en Discord.</p>
+                            
+                            <div class="announcement-actions">
+                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> Ver detalles</button>
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-bell"></i> Marcar como leído</button>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-user"></i> Publicado por: StreamerPrincipal</span>
+                                <span class="announcement-date"><i class="far fa-calendar-alt"></i> 10 de Junio, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Anuncio 3 -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card announcement-card h-100">
+                        <div class="announcement-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="m-0">Nuevos Comandos Disponibles <span class="announcement-priority priority-low">Prioridad Baja</span></h4>
+                            </div>
+                        </div>
+                        <div class="announcement-body">
+                            <p>Hemos añadido nuevos comandos para facilitar la moderación:</p>
+                            <ul>
+                                <li><code>!warn @usuario [razón]</code> - Envía una advertencia formal</li>
+                                <li><code>!stats</code> - Muestra estadísticas del canal</li>
+                                <li><code>!modhelp</code> - Muestra comandos disponibles para moderadores</li>
+                            </ul>
+                            <p>Pueden encontrar más información en la sección de Comandos.</p>
+                            
+                            <div class="announcement-actions">
+                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> Ver detalles</button>
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-bell"></i> Marcar como leído</button>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-user"></i> Publicado por: ModLead</span>
+                                <span class="announcement-date"><i class="far fa-calendar-alt"></i> 5 de Junio, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Anuncio 4 -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card announcement-card h-100">
+                        <div class="announcement-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="m-0">Reunión Mensual de Moderadores <span class="announcement-priority priority-medium">Prioridad Media</span></h4>
+                            </div>
+                        </div>
+                        <div class="announcement-body">
+                            <p>Recordatorio: Nuestra reunión mensual de moderadores se llevará a cabo este domingo a las 18:00 (hora del servidor).</p>
+                            <p>Temas a tratar:</p>
+                            <ul>
+                                <li>Revisión de incidentes del mes pasado</li>
+                                <li>Propuestas de mejora para el chat</li>
+                                <li>Coordinación para eventos futuros</li>
+                            </ul>
+                            <p>La asistencia es importante. Si no pueden asistir, por favor avisen con anticipación.</p>
+                            
+                            <div class="announcement-actions">
+                                <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> Ver detalles</button>
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-bell"></i> Marcar como leído</button>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-user"></i> Publicado por: Admin</span>
+                                <span class="announcement-date"><i class="far fa-calendar-alt"></i> 1 de Junio, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paginación optimizada -->
+            <nav aria-label="Navegación de anuncios">
+                <ul class="pagination justify-content-center mt-4">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Botón flotante para añadir anuncio (solo para administradores) -->
+            <a href="#" class="add-announcement-btn" title="Crear nuevo anuncio" aria-label="Crear nuevo anuncio">
+                <i class="fas fa-plus"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Panel de Moderadores | Desarrollado para la comunidad de Twitch</p>
+        </div>
+    </footer>
+
+    <!-- Scripts optimizados -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    
+    <!-- Script para mejorar el rendimiento -->
+    <script>
+        // Optimización de carga de página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Añadir clase para animaciones después de que la página esté cargada
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 100);
+            
+            // Optimización de eventos de hover en móviles
+            if ('ontouchstart' in document.documentElement) {
+                document.body.classList.add('touch-device');
+            }
+            
+            // Mejora de rendimiento para búsqueda
+            const searchInput = document.querySelector('.filters input');
+            if (searchInput) {
+                let debounceTimer;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        // Aquí iría la lógica de búsqueda
+                        console.log('Buscando: ' + searchInput.value);
+                    }, 300);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
