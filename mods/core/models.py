@@ -95,3 +95,4 @@ class anuncios(models.Model):
 
     def __str__(self):
         return self.mensaje
+

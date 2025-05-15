@@ -14,5 +14,7 @@ urlpatterns = [
     path('comandos', views.comandos, name='comandos'),
     path('protocolos', views.protocolos, name='protocolos'),
     path('anuncios', views.anuncios, name='anuncios'),
+    path('logout/', views.logout_view, name='logout'),
+    path('agregar_comando/', views.agregar_comando, name='agregar_comando'),
 ]
 

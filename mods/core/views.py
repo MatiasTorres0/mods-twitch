@@ -3,8 +3,8 @@ from django.contrib.auth import login as auth_login, authenticate # Import login
 from django.contrib import messages  # Asegúrate de importar messages
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
-from .forms import ModeradorRegistroForm
-from .models import Moderador
+from .forms import ComandoForm, ModeradorRegistroForm
+from .models import Moderador, Comando # Asegúrate de que Comando esté importado
 
 class ModeradorRegistroView(CreateView):
     model = Moderador
@@ -130,3 +130,30 @@ def protocolos(request):
 
 def anuncios(request):
     return render(request, 'dashboard/anuncios.html')
+
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    messages.success(request, 'Has cerrado sesión correctamente.')
+    return redirect('index')
+
+def agregar_comando(request):
+    if request.method == 'POST':
+        form = ComandoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Comando agregado exitosamente!')
+            return redirect('comandos')  # O la URL a la que quieras redirigir
+        else:
+            messages.error(request, 'Hubo un error al agregar el comando. Por favor, revisa el formulario.')
+    else:
+        form = ComandoForm()
+
+    # Obtener todos los comandos existentes para listarlos en la plantilla
+    comandos_existentes = Comando.objects.all()
+
+    context = {
+        'form': form,
+        'comandos': comandos_existentes
+    }
+    return render(request, 'dashboard/agregar_comando.html', context)
