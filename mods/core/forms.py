@@ -19,14 +19,14 @@ class ModeradorRegistroForm(UserCreationForm):
         opciones_disponibles = [(key, value) for key, value in Moderador.MODERADOR if key not in nombres_usados]
         self.fields['nombre_twitch'].choices = [('', 'Selecciona tu nombre de Twitch')] + opciones_disponibles
 
-class ComandoForm(forms.ModelForm): # Cambiado de forms.Form a forms.ModelForm
+class ComandoForm(forms.ModelForm):
     class Meta:
         model = Comando
         fields = ['nombre_comando', 'tipo_comando', 'descripcion', 'activo', 'ejemplo']
         widgets = {
             'nombre_comando': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: !saludo'}),
             'tipo_comando': forms.Select(attrs={'class': 'form-control'}),
-            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción breve del comando'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción breve del comando', 'maxlength': '1000'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'ejemplo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: !saludo @usuario'}),
         }
@@ -39,3 +39,7 @@ class ComandoForm(forms.ModelForm): # Cambiado de forms.Form a forms.ModelForm
         self.fields['descripcion'].label = "Descripción"
         self.fields['activo'].label = "Activo"
         self.fields['ejemplo'].label = "Ejemplo de Uso"
+        
+        # Actualizar el widget para permitir 1000 caracteres
+        if 'descripcion' in self.fields:
+            self.fields['descripcion'].widget.attrs.update({'maxlength': '1000'})

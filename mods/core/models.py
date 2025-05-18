@@ -16,7 +16,7 @@ class Comando(models.Model):
     )
     nombre_comando = models.CharField(max_length=20, unique=True)
     tipo_comando = models.CharField(max_length=10, choices=TIPO_COMANDO, default='TODOS')
-    descripcion = models.CharField(max_length=100)
+    descripcion = models.CharField(max_length=1000)
     activo = models.BooleanField(default=True, choices=ACTIVO)
     ejemplo = models.CharField(max_length=100)
 

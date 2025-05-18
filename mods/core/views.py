@@ -120,15 +120,42 @@ def login_view(request):
     return render(request, 'registro/login.html')
 
 def inicio(request):
+    if request.GET.get('ajax'):
+        # Si es una solicitud AJAX, devolver solo el contenido
+        return render(request, 'dashboard/inicio_content.html')
+    # Si no es AJAX, devolver la página completa
     return render(request, 'dashboard/inicio.html')
 
 def comandos(request):
-    # Obtener todos los comandos existentes
-    comandos = Comando.objects.all()
-    data = {
-        'comandos': comandos
-    }
-    return render(request, 'dashboard/comandos.html', data)
+    if request.GET.get('ajax'):
+        return render(request, 'dashboard/comandos_content.html')
+    return render(request, 'dashboard/comandos.html')
+
+def protocolos(request):
+    if request.GET.get('ajax'):
+        return render(request, 'dashboard/protocolos_content.html')
+    return render(request, 'dashboard/protocolos.html')
+
+def anuncios(request):
+    if request.GET.get('ajax'):
+        return render(request, 'dashboard/anuncios_content.html')
+    return render(request, 'dashboard/anuncios.html')
+
+def agregar_comando(request):
+    comando = ComandoForm()
+    if request.method == 'POST':
+        comando = ComandoForm(request.POST)
+        if comando.is_valid():
+            comando.save()
+            return redirect('comandos')
+    else:
+        comando = ComandoForm()
+    
+    context = {'comando': comando}
+    
+    if request.GET.get('ajax'):
+        return render(request, 'dashboard/agregar_comando_content.html', context)
+    return render(request, 'dashboard/agregar_comando.html', context)
 
 def editar_comando(request, comando_id):
     # Obtener el comando a editar
@@ -171,24 +198,3 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Has cerrado sesión correctamente.')
     return redirect('index')
-
-def agregar_comando(request):
-    if request.method == 'POST':
-        form = ComandoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, '¡Comando agregado exitosamente!')
-            return redirect('comandos')  # O la URL a la que quieras redirigir
-        else:
-            messages.error(request, 'Hubo un error al agregar el comando. Por favor, revisa el formulario.')
-    else:
-        form = ComandoForm()
-
-    # Obtener todos los comandos existentes para listarlos en la plantilla
-    comandos_existentes = Comando.objects.all()
-
-    context = {
-        'form': form,
-        'comandos': comandos_existentes
-    }
-    return render(request, 'dashboard/agregar_comando.html', context)
