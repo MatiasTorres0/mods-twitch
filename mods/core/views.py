@@ -127,9 +127,11 @@ def inicio(request):
     return render(request, 'dashboard/inicio.html')
 
 def comandos(request):
-    if request.GET.get('ajax'):
-        return render(request, 'dashboard/comandos_content.html')
-    return render(request, 'dashboard/comandos.html')
+    comandos = Comando.objects.all()
+    data = {
+        'comandos': comandos
+    }
+    return render(request, 'dashboard/comandos.html', data)
 
 def protocolos(request):
     if request.GET.get('ajax'):
@@ -142,20 +144,23 @@ def anuncios(request):
     return render(request, 'dashboard/anuncios.html')
 
 def agregar_comando(request):
-    comando = ComandoForm()
+    data = {
+        'form': ComandoForm()
+    }
     if request.method == 'POST':
         comando = ComandoForm(request.POST)
         if comando.is_valid():
             comando.save()
+            data['mensaje'] = "El comando ha sido agregado con éxito"
+
             return redirect('comandos')
     else:
         comando = ComandoForm()
     
     context = {'comando': comando}
     
-    if request.GET.get('ajax'):
-        return render(request, 'dashboard/agregar_comando_content.html', context)
-    return render(request, 'dashboard/agregar_comando.html', context)
+    
+    return render(request, 'dashboard/agregar_comando.html', data)
 
 def editar_comando(request, comando_id):
     # Obtener el comando a editar
