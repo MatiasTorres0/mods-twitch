@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar y Ver Comandos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px; /* Aumentado un poco para más detalles en la lista */
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-top: 0;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Espacio entre elementos del formulario */
+            margin-bottom: 30px;
+        }
+
+        label { /* Estilo general para etiquetas, usado por field.label_tag */
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block; /* Asegura que la etiqueta esté en su propia línea */
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%; 
+            box-sizing: border-box; 
+            background-color: #fff;
+            color: #333;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #9146FF; 
+            box-shadow: 0 0 0 3px rgba(145, 70, 255, 0.2);
+        }
+        
+        /* Estilos específicos para Checkbox */
+        .form-field-container input[type="checkbox"] {
+            width: auto; /* No ocupa todo el ancho */
+            height: auto;
+            padding: 0;
+            margin-right: 8px; 
+            vertical-align: middle;
+            position: relative;
+            top: -1px; /* Ajuste fino de alineación vertical */
+            accent-color: #9146FF; /* Color del check del checkbox (navegadores modernos) */
+        }
+        /* Si el label del checkbox debe ir al lado y no arriba (requiere ajuste en cómo se renderiza el field o CSS específico) */
+        /* .form-field-container-checkbox label { display: inline-block; margin-bottom: 0; } */
+
+
+        button[type="submit"] {
+            background-color: #9146FF; 
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #7a3eda; 
+        }
+        button[type="reset"] {
+            background-color: #ff4646; 
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="reset"]:hover {
+            background-color: #ff4646; 
+        }
+
+        ul#lista-comandos { /* ID añadido para especificidad si es necesario */
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul#lista-comandos li {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 5px solid #9146FF; 
+            line-height: 1.6;
+        }
+        ul#lista-comandos li strong {
+            color: #555;
+        }
+
+        /* Para mostrar mensajes de Django */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 20px auto; /* Centrar los mensajes */
+            width: 100%;
+            max-width: 700px; /* Igual que el container */
+        }
+        .messages li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .messages li.success { background-color: #28a745; }
+        .messages li.error { background-color: #dc3545; }
+        .messages li.info { background-color: #17a2b8; }
+        .messages li.warning { background-color: #ffc107; color: #333; }
+
+        /* Contenedor para cada campo del formulario Django */
+        .form-field-container { 
+            margin-bottom: 15px;
+        }
+        /* .form-field-container label ya está estilizado arriba */
+        
+        .form-field-container .helptext { 
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 4px;
+            display: block;
+        }
+        .form-field-container .errorlist { 
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+            color: #dc3545;
+            font-size: 0.9em;
+        }
+        .form-field-container .errorlist li {
+            margin-bottom: 3px;
+        }
+
+    </style>
+</head>
+<body>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="container">
+        <h1>Panel de Comandos</h1>
+
+        <h2>Agregar Nuevo Comando</h2>
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-field-container">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="helptext">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        {{ field.errors }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <button type="reset">Eliminar cambios</button>
+            <button type="submit">Modificar comando</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Comandos Existentes</h2>
+        {% if comandos %}
+            <ul id="lista-comandos">
+                {% for comando_obj in comandos %}
+                    <li>
+                        <strong>Comando:</strong> {{ comando_obj.nombre_comando }} <br>
+                        <strong>Tipo:</strong> {{ comando_obj.get_tipo_comando_display|default:comando_obj.tipo_comando|default:"No especificado" }} <br>
+                        <strong>Descripción:</strong> {{ comando_obj.descripcion|default:"Sin descripción." }} <br>
+                        <strong>Activo:</strong> {% if comando_obj.activo %}Sí{% else %}No{% endif %} <br>
+                        <strong>Ejemplo:</strong> {{ comando_obj.ejemplo|default:"Sin ejemplo." }}
+                        {# Aquí podrías agregar enlaces para editar/eliminar si lo deseas en el futuro #}
+                        {# Ejemplo: <a href="{% url 'editar_comando' comando_obj.id %}">Editar</a> #}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="text-align:center; padding: 20px 0;">No hay comandos guardados todavía.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

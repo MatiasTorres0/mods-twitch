@@ -123,7 +123,42 @@ def inicio(request):
     return render(request, 'dashboard/inicio.html')
 
 def comandos(request):
-    return render(request, 'dashboard/comandos.html')
+    # Obtener todos los comandos existentes
+    comandos = Comando.objects.all()
+    data = {
+        'comandos': comandos
+    }
+    return render(request, 'dashboard/comandos.html', data)
+
+def editar_comando(request, comando_id):
+    # Obtener el comando a editar
+    comando = Comando.objects.get(id=comando_id)
+    data = {
+        'form': ComandoForm(instance=comando)
+    }
+
+    if request.method == 'POST':
+        form = ComandoForm(data=request.POST, instance = comando)
+        if form.is_valid():
+            form.save()
+            data['mensaje'] = "El comando ha sido modificado con éxito"
+            data['form'] = form
+            return redirect('comandos')
+        else:
+            data['form'] = form
+            data['mensaje'] = "Error al modificar el comando"
+            
+    return render(request, 'dashboard/editar_comando.html', data)
+
+def eliminar_comando(request, comando_id):
+    # Obtener el comando a eliminar
+    comando = Comando.objects.get(id=comando_id)
+
+    # Eliminar el comando
+    comando.delete()
+
+    # Redirigir a la página de comandos o a donde desees
+    return redirect('comandos')
 
 def protocolos(request):
     return render(request, 'dashboard/protocolos.html')

@@ -1,0 +1,118 @@
+:root {
+    --twitch-purple: #9146FF;
+    --twitch-dark: #18181B;
+    --twitch-light: #F0F0FF;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.navbar {
+    background-color: var(--twitch-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: white !important;
+}
+
+.navbar-brand span {
+    color: var(--twitch-purple);
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-radius: 5px;
+    padding: 0.5rem 1rem !important;
+    margin: 0 0.2rem;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: white !important;
+    background-color: var(--twitch-purple);
+}
+
+.nav-link i {
+    margin-right: 5px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+.footer {
+    background-color: var(--twitch-dark);
+    color: white;
+    padding: 1.5rem 0;
+    margin-top: auto;
+}
+
+.dropdown-menu {
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: none;
+    padding: 0.5rem;
+}
+
+.dropdown-item {
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-item:hover {
+    background-color: var(--twitch-light);
+}
+
+.dropdown-item i {
+    margin-right: 8px;
+    color: var(--twitch-purple);
+}
+
+.btn-twitch {
+    background-color: var(--twitch-purple);
+    border-color: var(--twitch-purple);
+    color: white;
+    transition: all 0.2s;
+}
+
+.btn-twitch:hover {
+    background-color: #7d3bdb;
+    border-color: #7d3bdb;
+    color: white;
+}
+
+.btn:focus, .nav-link:focus, a:focus {
+    outline: 2px solid var(--twitch-purple);
+    outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .nav-link {
+        padding: 0.4rem 0.8rem !important;
+        margin: 0.1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        padding: 1rem 0;
+    }
+}

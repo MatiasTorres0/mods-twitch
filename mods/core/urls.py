@@ -16,5 +16,8 @@ urlpatterns = [
     path('anuncios', views.anuncios, name='anuncios'),
     path('logout/', views.logout_view, name='logout'),
     path('agregar_comando/', views.agregar_comando, name='agregar_comando'),
+    path('editar_comando/<int:comando_id>/', views.editar_comando, name='editar_comando'),
+    path('eliminar_comando/<int:comando_id>/', views.eliminar_comando, name='eliminar_comando'),
+
 ]
 

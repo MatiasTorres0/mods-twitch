@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Moderadores - Inicio</title>
     {% load static %}
+    <!-- En el <head> -->
+    <!-- En el <head> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/dashboard-common.css' %}">
     <style>
+        /* Estilos específicos de esta página */
         :root {
             --twitch-purple: #9146FF;
             --twitch-dark: #18181B;
@@ -243,6 +250,11 @@
                             <i class="fas fa-bullhorn"></i> Anuncios
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'agregar_comando' %}">
+                            <i class="fas fa-bullhorn"></i> Agregar Comandos
+                        </a>
+                    </li>
                 </ul>
                 <div class="navbar-nav">
                     <div class="nav-item dropdown">
@@ -330,6 +342,7 @@
         </div>
     </footer>
 
+    <!-- Al final del archivo, antes de </body> -->
     <!-- Scripts optimizados -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
     

@@ -383,103 +383,30 @@
                 </div>
             </div>
             
+            {% for c in comandos %}
             <!-- Lista de comandos -->
             <div class="row">
                 <!-- Comando 1 -->
                 <div class="col-lg-6 col-md-12 mb-4">
                     <div class="card command-card h-100">
                         <div class="command-header">
-                            <span>!ban</span>
+                            <span>{{c.nombre_comando}}</span>
                             <span class="command-category category-mod">Moderación</span>
                         </div>
                         <div class="command-body">
-                            <p><strong>Uso:</strong> <span class="command-name">!ban @usuario [razón]</span></p>
-                            <p><strong>Descripción:</strong> Banea permanentemente a un usuario del chat.</p>
-                            <p><strong>Permisos:</strong> Moderadores, VIPs</p>
+                            <p><strong>Uso:</strong> <span class="command-name">{{c.nombre_comando}}</span></p>
+                            <p><strong>Descripción:</strong>{{c.descripcion}}</p>
+                            <p><strong>Permisos:</strong>{{c.tipo_comando}}</p>
+                            <p><strong>Ejemplo:</strong>{{c.ejemplo}}</p>
                             <div class="command-actions">
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                <a class="btn btn-sm btn-outline-secondary" href="{% url 'editar_comando' c.id %}"><i class="fas fa-edit"></i> Editar</a>
+                                <a class="btn btn-sm btn-outline-danger" href="{% url 'eliminar_comando' c.id %}"><i class="fas fa-trash-alt"></i> Eliminar</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Comando 2 -->
-                <div class="col-lg-6 col-md-12 mb-4">
-                    <div class="card command-card h-100">
-                        <div class="command-header">
-                            <span>!timeout</span>
-                            <span class="command-category category-mod">Moderación</span>
-                        </div>
-                        <div class="command-body">
-                            <p><strong>Uso:</strong> <span class="command-name">!timeout @usuario [duración] [razón]</span></p>
-                            <p><strong>Descripción:</strong> Silencia temporalmente a un usuario en el chat.</p>
-                            <p><strong>Permisos:</strong> Moderadores, VIPs</p>
-                            <div class="command-actions">
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Comando 3 -->
-                <div class="col-lg-6 col-md-12 mb-4">
-                    <div class="card command-card h-100">
-                        <div class="command-header">
-                            <span>!horario</span>
-                            <span class="command-category category-info">Información</span>
-                        </div>
-                        <div class="command-body">
-                            <p><strong>Uso:</strong> <span class="command-name">!horario</span></p>
-                            <p><strong>Descripción:</strong> Muestra el horario de streams de la semana.</p>
-                            <p><strong>Permisos:</strong> Todos</p>
-                            <div class="command-actions">
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Comando 4 -->
-                <div class="col-lg-6 col-md-12 mb-4">
-                    <div class="card command-card h-100">
-                        <div class="command-header">
-                            <span>!redes</span>
-                            <span class="command-category category-info">Información</span>
-                        </div>
-                        <div class="command-body">
-                            <p><strong>Uso:</strong> <span class="command-name">!redes</span></p>
-                            <p><strong>Descripción:</strong> Muestra los enlaces a las redes sociales.</p>
-                            <p><strong>Permisos:</strong> Todos</p>
-                            <div class="command-actions">
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Comando 5 -->
-                <div class="col-lg-6 col-md-12 mb-4">
-                    <div class="card command-card h-100">
-                        <div class="command-header">
-                            <span>!dado</span>
-                            <span class="command-category category-fun">Diversión</span>
-                        </div>
-                        <div class="command-body">
-                            <p><strong>Uso:</strong> <span class="command-name">!dado [número]</span></p>
-                            <p><strong>Descripción:</strong> Lanza un dado con el número de caras especificado.</p>
-                            <p><strong>Permisos:</strong> Todos</p>
-                            <div class="command-actions">
-                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i> Editar</button>
-                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                {% endfor %}
             
             <!-- Botón flotante para añadir comando -->
             <a href="#" class="add-command-btn" title="Añadir nuevo comando" aria-label="Añadir nuevo comando">
