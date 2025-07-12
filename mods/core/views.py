@@ -229,11 +229,15 @@ def upload_excel_comandos(request):
             sheet = wb.active
             
             for row in sheet.iter_rows(min_row=2, values_only=True):
+                if len(row) < 4:
+                    messages.warning(request, f'Fila inválida: {row}')
+                    continue
+                
                 Comando.objects.create(
-                    nombre=row[0],
+                    nombre_comando=row[0],
                     descripcion=row[1],
-                    comando=row[2],
-                    categoria=row[3]
+                    ejemplo=row[2],
+                    tipo_comando=row[3]
                 )
             
             messages.success(request, f'{sheet.max_row -1} comandos importados!')

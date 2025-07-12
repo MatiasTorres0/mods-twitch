@@ -5,17 +5,17 @@ from django.utils import timezone
 # Create your models here.
 class Comando(models.Model):
     TIPO_COMANDO = (
-        ('TODOS', 'Todos'),
+        ('EVERYONE', 'Everyone'),
         ('VIP', 'VIP'),
-        ('MODERADOR', 'Moderador'),
-        ('SUPERMOD', 'Supermod'),
+        ('MODERATOR', 'Moderator'),
+        ('SUPER_MODERATOR', 'Super Moderator'),
     )
     ACTIVO = (
         (True, 'Activo'),
         (False, 'Inactivo'),
     )
     nombre_comando = models.CharField(max_length=20, unique=True)
-    tipo_comando = models.CharField(max_length=10, choices=TIPO_COMANDO, default='TODOS')
+    tipo_comando = models.CharField(max_length=20, choices=TIPO_COMANDO, default='TODOS')
     descripcion = models.CharField(max_length=1000)
     activo = models.BooleanField(default=True, choices=ACTIVO)
     ejemplo = models.CharField(max_length=100)
