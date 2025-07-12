@@ -5,7 +5,7 @@ from .models import Comando, Moderador
 class ModeradorRegistroForm(UserCreationForm):
     class Meta:
         model = Moderador
-        fields = ['nombre_twitch', 'alias', 'password1', 'password2']
+        fields = ['nombre_twitch', 'alias', 'email', 'password1', 'password2']
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -3,331 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Moderadores - Inicio</title>
-    {% load static %}
-    <!-- En el <head> -->
-    <!-- En el <head> -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'core/css/dashboard-common.css' %}">
+    <meta name="description" content="Panel de Moderadores de Twitch">
+    <title>Panel de Moderadores – Inicio</title>
+
+    <!-- CDN actualizadas -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
     <style>
-        /* Estilos específicos de esta página */
         :root {
-            --twitch-purple: #9146FF;
-            --twitch-dark: #18181B;
-            --twitch-light: #F0F0FF;
+            --primary: #00C566;
+            --primary-dark: #009E4A;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5F6368;
+            --border: #E0E0E0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --transition-speed: 0.2s;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden; /* Prevenir scroll horizontal */
         }
-        
-        /* Optimización de selectores para mejorar rendimiento */
-        .navbar {
-            background-color: var(--twitch-dark);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000; /* Asegurar que la barra de navegación esté siempre visible */
+
+        /* Barra lateral flotante */
+        .sidebar {
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            width: 80px;
+            transition: width var(--transition-speed);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
         }
-        
-        .navbar-brand {
+        .sidebar.expanded { width: 240px; }
+
+        .logo {
+            padding: 1.5rem 1rem;
             font-weight: 700;
-            color: white !important;
+            font-size: 1.1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        
-        .navbar-brand span {
-            color: var(--twitch-purple);
-        }
-        
-        /* Optimización de reglas CSS para reducir redundancia */
-        .nav-link {
-            color: rgba(255, 255, 255, 0.85) !important;
-            font-weight: 500;
-            transition: all 0.2s; /* Reducido de 0.3s para mejor rendimiento */
-            border-radius: 5px;
-            padding: 0.5rem 1rem !important;
-            margin: 0 0.2rem;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            color: white !important;
-            background-color: var(--twitch-purple);
-        }
-        
-        .nav-link i {
-            margin-right: 5px;
-        }
-        
-        .main-content {
+        .logo span { display: none; }
+        .sidebar.expanded .logo span { display: inline; }
+
+        .nav-menu {
             flex: 1;
-            padding: 2rem 0;
-        }
-        
-        /* Optimización de tarjetas para mejor rendimiento en móviles */
-        .dashboard-card {
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); /* Reducida la intensidad de la sombra */
-            transition: transform 0.2s, box-shadow 0.2s; /* Reducido tiempo de transición */
-            height: 100%;
-            border: none;
-            overflow: hidden;
-            will-change: transform; /* Optimización para animaciones */
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Reducida la intensidad de la sombra */
-        }
-        
-        .card-header {
-            background-color: var(--twitch-purple);
-            color: white;
-            font-weight: 600;
-            padding: 1rem;
-            border-bottom: none;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        .card-icon {
-            font-size: 2.5rem;
-            color: var(--twitch-purple);
-            margin-bottom: 1rem;
-        }
-        
-        .footer {
-            background-color: var(--twitch-dark);
-            color: white;
-            padding: 1.5rem 0;
-            margin-top: auto;
-        }
-        
-        .user-welcome {
-            background-color: var(--twitch-light);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border-left: 5px solid var(--twitch-purple);
-        }
-        
-        /* Botones optimizados */
-        .btn-twitch {
-            background-color: var(--twitch-purple);
-            border-color: var(--twitch-purple);
-            color: white;
-            transition: all 0.2s; /* Reducido tiempo de transición */
-        }
-        
-        .btn-twitch:hover {
-            background-color: #7d3bdb;
-            border-color: #7d3bdb;
-            color: white;
-        }
-        
-        .dropdown-menu {
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border: none;
             padding: 0.5rem;
         }
-        
-        .dropdown-item {
-            border-radius: 5px;
-            padding: 0.5rem 1rem;
+        .nav-link {
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 0.9rem 0.8rem;
+            margin: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            transition: background-color var(--transition-speed);
         }
-        
-        .dropdown-item:hover {
-            background-color: var(--twitch-light);
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: rgba(0, 197, 102, 0.1);
+            color: var(--primary);
         }
-        
-        .dropdown-item i {
-            margin-right: 8px;
-            color: var(--twitch-purple);
+        .nav-link span { opacity: 0; }
+        .sidebar.expanded .nav-link span { opacity: 1; }
+
+        .sidebar-toggle {
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: transform var(--transition-speed);
         }
-        
-        /* Media queries para mejorar responsividad */
-        @media (max-width: 768px) {
-            .user-welcome {
-                padding: 1rem;
-            }
-            
-            .user-welcome h2 {
-                font-size: 1.5rem;
-            }
-            
-            .card-icon {
-                font-size: 2rem;
-            }
-            
-            .navbar-brand {
-                font-size: 1.2rem;
-            }
-            
-            .nav-link {
-                padding: 0.4rem 0.8rem !important;
-                margin: 0.1rem;
-            }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 80px;
+            padding: 1.5rem;
+            flex: 1;
+            transition: margin-left var(--transition-speed);
         }
-        
-        @media (max-width: 576px) {
-            .main-content {
-                padding: 1rem 0;
-            }
-            
-            .card-body {
-                padding: 1rem;
-            }
-            
-            .user-welcome h2 {
-                font-size: 1.3rem;
-            }
-            
-            .card-icon {
-                font-size: 1.8rem;
-                margin-bottom: 0.5rem;
-            }
+        .sidebar.expanded + .main-content { margin-left: 240px; }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
-        
-        /* Optimización para carga diferida de imágenes */
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
-        
-        /* Mejora de accesibilidad */
-        .btn, .nav-link, a {
-            transition: all 0.2s;
+        .welcome-text {
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
-        
-        .btn:focus, .nav-link:focus, a:focus {
-            outline: 2px solid var(--twitch-purple);
-            outline-offset: 2px;
+
+        .stat-card {
+            background-color: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform var(--transition-speed);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 48px; height: 48px;
+            background-color: rgba(0, 197, 102, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stat-icon i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .dashboard-card {
+            background-color: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: transform var(--transition-speed);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+        .card-body {
+            padding: 2rem;
+            flex: 1;
+            text-align: center;
+        }
+        .card-icon {
+            width: 64px; height: 64px;
+            background-color: rgba(0, 197, 102, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .card-icon i {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+        .btn-custom {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color var(--transition-speed);
+        }
+        .btn-custom:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar { width: 0; }
+            .sidebar.expanded { width: 240px; }
+            .main-content { margin-left: 0; }
         }
     </style>
 </head>
 <body>
-    <!-- Barra de navegación -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'inicio' %}">
-                <i class="fab fa-twitch"></i> Panel<span>Mods</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'inicio' %}">
-                            <i class="fas fa-home"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'comandos' %}">
-                            <i class="fas fa-terminal"></i> Comandos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'protocolos' %}">
-                            <i class="fas fa-shield-alt"></i> Protocolos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'anuncios' %}">
-                            <i class="fas fa-bullhorn"></i> Anuncios
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'agregar_comando' %}">
-                            <i class="fas fa-bullhorn"></i> Agregar Comandos
-                        </a>
-                    </li>
-                </ul>
-                <div class="navbar-nav">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i> Mi Cuenta
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Perfil</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Configuración</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <!-- Barra lateral -->
+    <div class="sidebar expanded" id="sidebar">
+        <div class="logo">
+            <i class="fab fa-twitch"></i>
+            <span>PanelMods</span>
         </div>
-    </nav>
+        <div class="nav-menu">
+            <a class="nav-link active" href="{% url 'inicio' %}">
+                <i class="fas fa-home"></i><span>Inicio</span>
+            </a>
+            <a class="nav-link" href="{% url 'comandos' %}">
+                <i class="fas fa-terminal"></i><span>Comandos</span>
+            </a>
+            <a class="nav-link" href="{% url 'protocolos' %}">
+                <i class="fas fa-shield-alt"></i><span>Protocolos</span>
+            </a>
+            <a class="nav-link" href="{% url 'anuncios' %}">
+                <i class="fas fa-bullhorn"></i><span>Anuncios</span>
+            </a>
+        </div>
+        <div class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+    </div>
 
     <!-- Contenido principal -->
     <div class="main-content">
         <div class="container">
-            <!-- Mensaje de bienvenida -->
-            <div class="user-welcome">
-                <h2><i class="fas fa-hand-peace"></i> ¡Bienvenido al Panel de Moderadores!</h2>
-                <p class="mb-0">Desde aquí podrás gestionar comandos, revisar protocolos y acceder a todas las herramientas necesarias para tu labor como moderador.</p>
+            <section class="welcome-section">
+                <h1 class="welcome-title"><i class="fas fa-hand-peace"></i> ¡Bienvenido al Panel de Moderadores!</h1>
+                <p class="welcome-text">Gestiona comandos, protocolos y anuncios desde un solo lugar.</p>
+            </section>
+
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-terminal"></i></div>
+                        <div class="stat-value">150</div>
+                        <div class="stat-label">Comandos Activos</div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="stat-value">25</div>
+                        <div class="stat-label">Protocolos</div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-bullhorn"></i></div>
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">Anuncios Activos</div>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Tarjetas de acceso rápido -->
-            <h3 class="mb-4">Acceso Rápido</h3>
+
+            <!-- Acciones rápidas -->
             <div class="row g-4">
-                <!-- Tarjetas optimizadas con atributos de carga diferida -->
                 <div class="col-md-6 col-lg-4">
-                    <div class="card dashboard-card">
-                        <div class="card-header">
-                            Comandos
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="card-icon">
-                                <i class="fas fa-terminal"></i>
-                            </div>
-                            <h5 class="card-title">Gestión de Comandos</h5>
-                            <p class="card-text">Administra los comandos del chat, crea nuevos o modifica los existentes.</p>
-                            <a href="{% url 'comandos' %}" class="btn btn-twitch">Ir a Comandos</a>
+                    <div class="dashboard-card">
+                        <div class="card-header">Comandos</div>
+                        <div class="card-body">
+                            <div class="card-icon"><i class="fas fa-terminal"></i></div>
+                            <h5 class="mb-2">Gestión de Comandos</h5>
+                            <p class="mb-3">Administra los comandos del chat, crea nuevos o modifica los existentes.</p>
+                            <a href="{% url 'comandos' %}" class="btn-custom">Ir a Comandos</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card dashboard-card">
-                        <div class="card-header">
-                            Protocolos
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="card-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <h5 class="card-title">Protocolos de Moderación</h5>
-                            <p class="card-text">Consulta los protocolos establecidos para diferentes situaciones en el chat.</p>
-                            <a href="{% url 'protocolos' %}" class="btn btn-twitch">Ver Protocolos</a>
+                    <div class="dashboard-card">
+                        <div class="card-header">Protocolos</div>
+                        <div class="card-body">
+                            <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+                            <h5 class="mb-2">Protocolos</h5>
+                            <p class="mb-3">Consulta los protocolos establecidos para diferentes situaciones.</p>
+                            <a href="{% url 'protocolos' %}" class="btn-custom">Ver Protocolos</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card dashboard-card">
-                        <div class="card-header">
-                            Anuncios
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="card-icon">
-                                <i class="fas fa-bullhorn"></i>
-                            </div>
-                            <h5 class="card-title">Anuncios del Canal</h5>
-                            <p class="card-text">Mantente informado sobre las últimas novedades y eventos importantes del canal.</p>
-                            <a href="{% url 'anuncios' %}" class="btn btn-twitch">Ver Anuncios</a>
+                    <div class="dashboard-card">
+                        <div class="card-header">Anuncios</div>
+                        <div class="card-body">
+                            <div class="card-icon"><i class="fas fa-bullhorn"></i></div>
+                            <h5 class="mb-2">Anuncios</h5>
+                            <p class="mb-3">Mantén informada a la comunidad con anuncios actualizados.</p>
+                            <a href="{% url 'anuncios' %}" class="btn-custom">Ver Anuncios</a>
                         </div>
                     </div>
                 </div>
@@ -335,30 +313,16 @@
         </div>
     </div>
 
-    <!-- Pie de página -->
     <footer class="footer">
         <div class="container text-center">
             <p class="mb-0">&copy; 2025 Panel de Moderadores | Desarrollado para la comunidad de Twitch</p>
         </div>
     </footer>
 
-    <!-- Al final del archivo, antes de </body> -->
-    <!-- Scripts optimizados -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
-    
-    <!-- Script para mejorar el rendimiento -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script>
-        // Optimización de carga de página
-        document.addEventListener('DOMContentLoaded', function() {
-            // Añadir clase para animaciones después de que la página esté cargada
-            setTimeout(function() {
-                document.body.classList.add('loaded');
-            }, 100);
-            
-            // Optimización de eventos de hover en móviles
-            if ('ontouchstart' in document.documentElement) {
-                document.body.classList.add('touch-device');
-            }
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('expanded');
         });
     </script>
 </body>

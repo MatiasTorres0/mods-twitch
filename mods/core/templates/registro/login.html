@@ -177,7 +177,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text"><i class="fas fa-at twitch-color"></i></span>
             </div>
-            <input type="text" name="username" class="form-control with-icon" id="id_username" placeholder="Tu nombre exacto en Twitch" required>
+            <input type="text" name="nombre_twitch" class="form-control with-icon" id="id_username" placeholder="Tu nombre exacto en Twitch" required>
           </div>
         </div>
         
@@ -213,6 +213,9 @@
     </div>
     <div class="card-footer text-center">
       <p class="m-0">¿No tienes una cuenta? <a href="{% url 'registro' %}" class="font-weight-bold twitch-color">Regístrate</a></p>
+      <p class="m-0 mt-2">
+        <a href="{% url 'password_reset' %}" class="font-weight-bold twitch-color">¿Olvidaste tu contraseña?</a>
+      </p>
     </div>
   </div>
 </div>

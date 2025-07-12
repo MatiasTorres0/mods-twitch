@@ -72,7 +72,10 @@ class Moderador(AbstractUser):
     password = models.CharField(max_length=128, default='changeme')
     # Configuración para autenticación
     USERNAME_FIELD = 'nombre_twitch'
-    REQUIRED_FIELDS = ['alias']
+    # En la clase Moderador, agregar:
+    email = models.EmailField(unique=True)
+    # Actualizar REQUIRED_FIELDS
+    REQUIRED_FIELDS = ['alias', 'email']
     
     objects = ModeradorManager()
     

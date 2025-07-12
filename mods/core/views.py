@@ -5,6 +5,8 @@ from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from .forms import ComandoForm, ModeradorRegistroForm
 from .models import Moderador, Comando # Asegúrate de que Comando esté importado
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from openpyxl import load_workbook
 
 class ModeradorRegistroView(CreateView):
     model = Moderador
@@ -70,19 +72,18 @@ def registro(request):
         print("Formulario enviado")
         print("Errores:", form.errors)
         if form.is_valid():
-            user_obj = form.save() # Renamed to user_obj to avoid conflict with user variable below
+            user_obj = form.save()
             nombre_twitch = form.cleaned_data.get('nombre_twitch')
             password = form.cleaned_data.get('password1')
-            # Authenticate the user that was just created
-            # Cambio aquí: usar nombre_twitch en lugar de username
+            
+            # Autenticar usando nombre_twitch
             user_auth = authenticate(request, nombre_twitch=nombre_twitch, password=password)
-            # En la función registro o en ModeradorRegistroView
+            
             if user_auth is not None:
                 auth_login(request, user_auth)
                 messages.success(request, f'¡Registro exitoso! Recuerda que tu nombre de usuario para iniciar sesión es: {nombre_twitch}')
                 return redirect('login')
             else:
-                # This case might happen if password hashing or username field is mismatched
                 messages.error(request, "No se pudo autenticar después del registro.")
                 return redirect('login')
     else:
@@ -91,29 +92,23 @@ def registro(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username') # 'username' aquí es el valor del campo nombre_twitch del formulario
+        nombre_twitch = request.POST.get('nombre_twitch')  # Cambiado de 'username'
         password = request.POST.get('password')
         
-        # Intentar autenticar con el nombre exacto
-        user = authenticate(request, nombre_twitch=username, password=password)
+        user = authenticate(request, nombre_twitch=nombre_twitch, password=password)
         
-        # Si falla, intentar buscar el usuario manualmente para dar un mensaje más específico
         if user is None:
             try:
-                # Verificar si existe un moderador con ese nombre (ignorando mayúsculas/minúsculas)
-                posible_moderador = Moderador.objects.filter(nombre_twitch__iexact=username).first()
+                posible_moderador = Moderador.objects.filter(nombre_twitch__iexact=nombre_twitch).first()
                 if posible_moderador:
-                    # Existe el usuario pero la contraseña es incorrecta
                     messages.error(request, 'Contraseña incorrecta. Por favor, intenta de nuevo.')
                 else:
-                    # No existe un usuario con ese nombre
-                    messages.error(request, f'No existe un moderador con el nombre "{username}". Verifica que sea tu nombre de Twitch exacto.')
-            except:
-                # Error general
+                    messages.error(request, f'No existe un moderador con el nombre "{nombre_twitch}". Verifica que sea tu nombre de Twitch exacto.')
+            except Exception as e:
+                print(f"Error during login: {str(e)}")
                 messages.error(request, 'Nombre de Twitch o contraseña incorrectos.')
             return render(request, 'registro/login.html', {'error_message': 'Credenciales incorrectas'})
         
-        # Si la autenticación es exitosa
         auth_login(request, user)
         return redirect('inicio')
     
@@ -203,3 +198,48 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Has cerrado sesión correctamente.')
     return redirect('index')
+
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'core/password_reset_form.html'
+    email_template_name = 'core/password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'core/password_reset_done.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'core/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'core/password_reset_complete.html'
+
+
+def upload_excel_comandos(request):
+    if request.method == 'POST':
+        excel_file = request.FILES.get('excel_file')
+        
+        if not excel_file.name.endswith('.xlsx'):
+            messages.error(request, 'Formato de archivo no válido')
+            return redirect('comandos')
+
+        try:
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                Comando.objects.create(
+                    nombre=row[0],
+                    descripcion=row[1],
+                    comando=row[2],
+                    categoria=row[3]
+                )
+            
+            messages.success(request, f'{sheet.max_row -1} comandos importados!')
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+        
+        return redirect('comandos')
+    
+    return render(request, 'dashboard/agregar_comandos_excel.html')
