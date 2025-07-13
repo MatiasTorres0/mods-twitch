@@ -1,7 +1,16 @@
+from django.db import router
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.utils.translation import round_away_from_one
 from . import views
 from .views import upload_excel_comandos
+from rest_framework import routers
+from django.urls.conf import include
+
+
+router = routers.DefaultRouter()
+router.register('comandos', views.ComandoViewSet)
+router.register('moderadores', views.ModeradorViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -33,5 +42,6 @@ urlpatterns = [
         template_name='registration/password_reset_complete.html'
     ), name='password_reset_complete'),
     path('comandos/upload-excel/', upload_excel_comandos, name='upload_excel_comandos'),
+    path('api/', include(router.urls)),
 ]
 

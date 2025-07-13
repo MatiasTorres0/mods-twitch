@@ -7,6 +7,9 @@ from .forms import ComandoForm, ModeradorRegistroForm
 from .models import Moderador, Comando # Asegúrate de que Comando esté importado
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from openpyxl import load_workbook
+from rest_framework import viewsets
+from .serializers import ComandoSerializer, ModeradorSerializer
+
 
 class ModeradorRegistroView(CreateView):
     model = Moderador
@@ -249,3 +252,12 @@ def upload_excel_comandos(request):
         return redirect('comandos')
     
     return render(request, 'dashboard/agregar_comandos_excel.html')
+
+
+class ComandoViewSet(viewsets.ModelViewSet):
+    queryset = Comando.objects.all()
+    serializer_class = ComandoSerializer
+
+class ModeradorViewSet(viewsets.ModelViewSet):
+    queryset = Moderador.objects.all()
+    serializer_class = ModeradorSerializer
