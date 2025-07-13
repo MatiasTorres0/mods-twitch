@@ -229,17 +229,19 @@ def upload_excel_comandos(request):
             sheet = wb.active
             
             for row in sheet.iter_rows(min_row=2, values_only=True):
-                if len(row) < 4:
+                if len(row) < 3:  # Cambiado a 3 columnas
                     messages.warning(request, f'Fila inválida: {row}')
                     continue
                 
+                # Eliminado el bucle for row in rows redundante
                 Comando.objects.create(
                     nombre_comando=row[0],
-                    descripcion=row[1],
-                    ejemplo=row[2],
-                    tipo_comando=row[3]
+                    tipo_comando=row[1],  # Segunda columna como categoría
+                    descripcion=row[2],   # Tercera columna como descripción
+                    ejemplo=row[2],       # Usar la descripción como ejemplo
+                    activo=True
                 )
-            
+                
             messages.success(request, f'{sheet.max_row -1} comandos importados!')
         except Exception as e:
             messages.error(request, f'Error: {str(e)}')

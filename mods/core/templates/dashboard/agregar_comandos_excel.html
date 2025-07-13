@@ -1,8 +1,367 @@
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label class="form-label">Seleccionar archivo Excel:</label>
-        <input type="file" name="excel_file" class="form-control" accept=".xlsx">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Panel de Moderadores – Subir Excel</title>
+
+    <!-- CDN actualizadas -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00C566;
+            --primary-dark: #009E4A;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5F6368;
+            --border: #E0E0E0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Barra lateral flotante */
+        .sidebar {
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            width: 80px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-x: hidden;
+        }
+        .sidebar.expanded { width: 240px; }
+
+        .logo {
+            padding: 1.5rem 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            white-space: nowrap;
+        }
+        .logo span { 
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar.expanded .logo span { 
+            opacity: 1;
+            display: inline; 
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 0.5rem;
+        }
+        .nav-link {
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 0.9rem 0.8rem;
+            margin: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: rgba(0, 197, 102, 0.1);
+            color: var(--primary);
+        }
+        .nav-link span { 
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar.expanded .nav-link span { opacity: 1; }
+
+        .sidebar-toggle {
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        .sidebar.expanded .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 80px;
+            padding: 1.5rem;
+            flex: 1;
+            transition: margin-left 0.3s ease;
+            width: calc(100% - 80px);
+        }
+        .sidebar.expanded + .main-content { 
+            margin-left: 240px;
+            width: calc(100% - 240px);
+        }
+
+        /* Contenedor del formulario */
+        .upload-card {
+            background-color: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem 3rem;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .upload-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Drag & drop visual */
+        .drag-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: var(--text-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+        .drag-area:hover,
+        .drag-area.dragover {
+            border-color: var(--primary);
+            background-color: rgba(0, 197, 102, 0.05);
+            color: var(--primary);
+        }
+        .drag-area i { 
+            font-size: 2.5rem; 
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        .drag-area span { 
+            font-weight: 500;
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar { 
+                transform: translateX(-100%);
+                width: 240px;
+            }
+            .sidebar.expanded { 
+                transform: translateX(0);
+            }
+            .main-content { 
+                margin-left: 0;
+                width: 100%;
+            }
+            .sidebar.expanded + .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .upload-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+        }
+
+        /* Overlay for mobile when sidebar is open */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        @media (max-width: 992px) {
+            .sidebar.expanded ~ .overlay {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra lateral -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fab fa-twitch"></i><span>PanelMods</span>
+        </div>
+        <div class="nav-menu">
+            <a class="nav-link" href="{% url 'inicio' %}"><i class="fas fa-home"></i><span>Inicio</span></a>
+            <a class="nav-link" href="{% url 'comandos' %}"><i class="fas fa-terminal"></i><span>Comandos</span></a>
+            <a class="nav-link" href="{% url 'protocolos' %}"><i class="fas fa-shield-alt"></i><span>Protocolos</span></a>
+            <a class="nav-link" href="{% url 'anuncios' %}"><i class="fas fa-bullhorn"></i><span>Anuncios</span></a>
+        </div>
+        <div class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-chevron-left"></i>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Subir y Procesar</button>
-</form>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="container">
+            <h1 class="upload-title"><i class="fas fa-file-excel"></i> Subir Comandos desde Excel</h1>
+
+            <div class="upload-card">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+
+                    <!-- Drag & Drop -->
+                    <div class="drag-area" id="dragArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span id="dropText">Arrastra aquí tu archivo .xlsx o haz clic para seleccionar</span>
+                        <input type="file" name="excel_file" id="excelInput"
+                               class="form-control d-none" accept=".xlsx,.xls">
+                    </div>
+
+                    <!-- Botón de envío -->
+                    <button type="submit" class="btn btn-primary w-100 mt-4" id="submitBtn">
+                        <i class="fas fa-upload"></i> Subir y Procesar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script>
+        // Toggle sidebar
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        function toggleSidebar() {
+            sidebar.classList.toggle('expanded');
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Drag & drop functionality
+        const dragArea = document.getElementById('dragArea');
+        const fileInput = document.getElementById('excelInput');
+        const dropText = document.getElementById('dropText');
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dragArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dragArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dragArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dragArea.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dragArea.classList.remove('dragover');
+        }
+
+        // Handle dropped files
+        dragArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if(files.length) {
+                const file = files[0];
+                if(file.name.match(/\.(xlsx|xls)$/)) {
+                    fileInput.files = files;
+                    updateDropText(file.name);
+                } else {
+                    alert('Por favor, selecciona un archivo Excel válido (.xlsx o .xls)');
+                }
+            }
+        }
+
+        // Handle click to select file
+        dragArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', function() {
+            if(this.files.length) {
+                updateDropText(this.files[0].name);
+            }
+        });
+
+        function updateDropText(fileName) {
+            dropText.textContent = `Archivo seleccionado: ${fileName}`;
+        }
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if(!fileInput.files.length) {
+                e.preventDefault();
+                alert('Por favor, selecciona un archivo antes de enviar');
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        });
+    </script>
+</body>
+</html>

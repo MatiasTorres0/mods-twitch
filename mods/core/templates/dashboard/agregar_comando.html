@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Panel de Moderadores – Comandos</title>
     {% load static %}
 
     <!-- Fuentes e íconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-..." crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-..." crossorigin="anonymous">
 
     <style>
         :root {
@@ -25,7 +26,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--background);
             color: var(--text-primary);
             margin: 0;
@@ -34,7 +35,6 @@
             flex-direction: column;
         }
 
-        /* Contenedor centrado */
         .container {
             background-color: var(--surface);
             border-radius: 12px;
@@ -42,18 +42,17 @@
             padding: 2rem 2.5rem;
             margin: 2rem auto;
             max-width: 720px;
-            width: 100%;
+            width: calc(100% - 2rem);
+            box-sizing: border-box;
         }
 
-        h1,
-        h2 {
+        h1, h2 {
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 1.5rem;
             text-align: center;
         }
 
-        /* Formulario */
         form {
             display: flex;
             flex-direction: column;
@@ -61,20 +60,26 @@
             margin-bottom: 2rem;
         }
 
+        .form-field-container {
+            margin-bottom: 1rem;
+        }
+
         label {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
             color: var(--text-primary);
+            display: block;
         }
 
         input[type="text"],
         textarea,
         select {
+            width: 100%;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 0.75rem;
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.2s ease;
             background-color: var(--surface);
         }
 
@@ -90,6 +95,7 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
             margin-top: 0.25rem;
+            display: block;
         }
 
         .errorlist {
@@ -109,15 +115,20 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 0.5rem;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+            width: 100%;
         }
 
         button[type="submit"]:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-1px);
         }
 
-        /* Lista de comandos */
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
         .commands-list {
             list-style: none;
             padding: 0;
@@ -131,9 +142,9 @@
             background-color: var(--surface);
             border-radius: 12px;
             box-shadow: var(--shadow);
-            padding: 1rem 1.25rem;
+            padding: 1.25rem;
             border-left: 4px solid var(--primary);
-            transition: transform 0.2s;
+            transition: all 0.2s ease;
         }
 
         .command-card:hover {
@@ -143,19 +154,34 @@
 
         .command-card strong {
             color: var(--text-primary);
+            display: inline-block;
+            margin-right: 0.5rem;
         }
 
-        .command-card small {
-            color: var(--text-secondary);
+        .command-card code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
         }
 
-        /* Mensajes de Django */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 1rem auto;
+            max-width: 720px;
+            width: calc(100% - 2rem);
+        }
+
         .messages li {
-            padding: 0.75rem 1rem;
+            padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1rem;
             color: white;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .messages li.success {
@@ -165,21 +191,33 @@
         .messages li.error {
             background-color: #dc3545;
         }
+
+        .btn-success {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem auto;
+            }
+        }
     </style>
 </head>
 
 <body>
-
-    <!-- Mensajes de Django -->
     {% if messages %}
     <ul class="messages">
         {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
-            {% endfor %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message }}
+            <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="this.parentElement.remove()"></button>
+        </li>
+        {% endfor %}
     </ul>
     {% endif %}
 
-    <!-- Sección Agregar Comando -->
     <div class="container">
         <h1>Panel de Comandos</h1>
         <h2>Agregar Nuevo Comando</h2>
@@ -187,7 +225,8 @@
         <a href="{% url 'upload_excel_comandos' %}" class="btn btn-success">
             <i class="fas fa-file-excel"></i> Cargar desde Excel
         </a>
-        <form method="post">
+        
+        <form method="post" novalidate>
             {% csrf_token %}
             {% for field in form %}
             <div class="form-field-container">
@@ -197,15 +236,20 @@
                 <small class="helptext">{{ field.help_text }}</small>
                 {% endif %}
                 {% if field.errors %}
-                {{ field.errors }}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
                 {% endif %}
             </div>
             {% endfor %}
-            <button type="submit">Agregar Comando</button>
+            <button type="submit">
+                <i class="fas fa-plus-circle"></i> Agregar Comando
+            </button>
         </form>
     </div>
 
-    <!-- Sección Ver Comandos -->
     <div class="container">
         <h2>Comandos Existentes</h2>
 
@@ -213,7 +257,7 @@
         <ul class="commands-list">
             {% for c in comandos %}
             <li class="command-card">
-                <strong>{{ c.nombre_comando }}</strong>
+                <strong>{{ c.nombre_comando|default:"Sin nombre" }}</strong>
                 <br>
                 <strong>Tipo:</strong> {{ c.get_tipo_comando_display|default:"Sin tipo" }} |
                 <strong>Activo:</strong> {% if c.activo %}Sí{% else %}No{% endif %}
@@ -235,6 +279,19 @@
         {% endif %}
     </div>
 
+    <script>
+        // Add fade out animation for messages
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.querySelectorAll('.messages li').forEach(function(message) {
+                    message.style.transition = 'opacity 0.5s ease';
+                    message.style.opacity = '0';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 500);
+                });
+            }, 5000);
+        });
+    </script>
 </body>
-
 </html>
