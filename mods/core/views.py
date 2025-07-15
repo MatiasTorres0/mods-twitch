@@ -1,9 +1,10 @@
+from django.http import request
 from django.shortcuts import render, redirect
 from django.contrib.auth import login as auth_login, authenticate # Import login as auth_login globally
 from django.contrib import messages  # Asegúrate de importar messages
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
-from .forms import ComandoForm, ModeradorRegistroForm
+from .forms import ComandoForm, ModeradorRegistroForm, AnunciosForm
 from .models import Moderador, Comando # Asegúrate de que Comando esté importado
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from openpyxl import load_workbook
@@ -261,3 +262,16 @@ class ComandoViewSet(viewsets.ModelViewSet):
 class ModeradorViewSet(viewsets.ModelViewSet):
     queryset = Moderador.objects.all()
     serializer_class = ModeradorSerializer
+
+def agregar_anuncio(request):
+    if request.method == 'POST':
+        form = AnunciosForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('anuncios')
+    else:
+        form = AnunciosForm()
+    return render(request, 'dashboard/agregar_anuncio.html', {'form': form})
+
+def politicas_uso_app(request):
+    return render(request, 'core/politicas_uso_app.html')

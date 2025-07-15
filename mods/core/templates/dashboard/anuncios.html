@@ -253,9 +253,13 @@
                 <i class="fas fa-bullhorn"></i>
                 <span>Anuncios</span>
             </a>
-            <a class="nav-link" href="">
+            <a class="nav-link" href="{%url 'agregar_comando' %}">
                 <i class="fas fa-plus-circle"></i>
                 <span>Agregar</span>
+            </a>
+            <a class="nav-link" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
             </a>
         </div>
 

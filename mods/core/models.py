@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -92,7 +93,15 @@ class Moderador(AbstractUser):
                 raise ValidationError('El nombre de Twitch no puede ser modificado después de la creación.')
         super().clean()
 
-class anuncios(models.Model):
+class Anuncios(models.Model):
+    titulo = models.CharField(max_length=100, default="")
+    contenido = models.TextField(max_length=20000, default="")
+    fecha_inicio = models.DateTimeField(default=timezone.now)
+    fecha_fin = models.DateTimeField(default=timezone.now)
+    activo = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.titulo
     mensaje = models.CharField(max_length=200)
     fecha = models.DateTimeField(auto_now_add=True)
 

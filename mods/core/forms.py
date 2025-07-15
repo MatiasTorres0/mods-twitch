@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Comando, Moderador
+from .models import Comando, Moderador, Anuncios  # Añadido Anuncios
 
 class ModeradorRegistroForm(UserCreationForm):
     class Meta:
@@ -43,3 +43,24 @@ class ComandoForm(forms.ModelForm):
         # Actualizar el widget para permitir 1000 caracteres
         if 'descripcion' in self.fields:
             self.fields['descripcion'].widget.attrs.update({'maxlength': '1000'})
+
+
+class AnunciosForm(forms.ModelForm):
+    class Meta:
+        model = Anuncios
+        fields = ['titulo', 'contenido', 'fecha_inicio', 'fecha_fin', 'activo']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'contenido': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'fecha_inicio': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'fecha_fin': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['titulo'].label = "Título"
+        self.fields['contenido'].label = "Contenido"
+        self.fields['fecha_inicio'].label = "Fecha de Inicio"
+        self.fields['fecha_fin'].label = "Fecha de Fin"
+        self.fields['activo'].label = "¿Activo?"

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Panel de Moderadores – Comandos</title>
+    <title>Panel de Moderadores – Anuncios</title>
     {% load static %}
 
     <!-- Fuentes e íconos -->
@@ -73,7 +73,8 @@
 
         input[type="text"],
         textarea,
-        select {
+        select,
+        input[type="datetime-local"] {
             width: 100%;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -85,7 +86,8 @@
 
         input[type="text"]:focus,
         textarea:focus,
-        select:focus {
+        select:focus,
+        input[type="datetime-local"]:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 197, 102, 0.15);
             outline: none;
@@ -129,42 +131,6 @@
             transform: translateY(0);
         }
 
-        .commands-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .command-card {
-            background-color: var(--surface);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            padding: 1.25rem;
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s ease;
-        }
-
-        .command-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .command-card strong {
-            color: var(--text-primary);
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-
-        .command-card code {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-
         .messages {
             list-style: none;
             padding: 0;
@@ -192,11 +158,6 @@
             background-color: #dc3545;
         }
 
-        .btn-success {
-            margin-bottom: 1rem;
-            width: 100%;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 1.5rem;
@@ -219,13 +180,8 @@
     {% endif %}
 
     <div class="container">
-        <h1>Panel de Comandos</h1>
-        <h2>Agregar Nuevo Comando</h2>
-
-        <a href="{% url 'upload_excel_comandos' %}" class="btn btn-success d-flex align-items-center justify-content-center gap-2" style="background-color: var(--primary); border: none; padding: 0.75rem 1.5rem; font-weight: 600; transition: all 0.2s ease; text-decoration: none;">
-            <i class="fas fa-file-excel fa-lg"></i>
-            <span>Cargar desde Excel</span>
-        </a>
+        <h1>Panel de Anuncios</h1>
+        <h2>Agregar Nuevo Anuncio</h2>
         
         <form method="post" novalidate>
             {% csrf_token %}
@@ -246,38 +202,9 @@
             </div>
             {% endfor %}
             <button type="submit">
-                <i class="fas fa-plus-circle"></i> Agregar Comando
+                <i class="fas fa-plus-circle"></i> Publicar Anuncio
             </button>
         </form>
-    </div>
-
-    <div class="container">
-        <h2>Comandos Existentes</h2>
-
-        {% if comandos %}
-        <ul class="commands-list">
-            {% for c in comandos %}
-            <li class="command-card">
-                <strong>{{ c.nombre_comando|default:"Sin nombre" }}</strong>
-                <br>
-                <strong>Tipo:</strong> {{ c.get_tipo_comando_display|default:"Sin tipo" }} |
-                <strong>Activo:</strong> {% if c.activo %}Sí{% else %}No{% endif %}
-                <br>
-                <strong>Descripción:</strong> {{ c.descripcion|default:"Sin descripción" }}
-                <br>
-                <strong>Ejemplo:</strong> <code>{{ c.ejemplo|default:"Sin ejemplo" }}</code>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <div class="text-center py-4">
-            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-            <p class="text-muted">No hay comandos aún</p>
-            <a href="{% url 'agregar_comando' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Agregar el primero
-            </a>
-        </div>
-        {% endif %}
     </div>
 
     <script>
