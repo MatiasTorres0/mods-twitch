@@ -43,7 +43,7 @@ urlpatterns = [
     ), name='password_reset_complete'),
     path('comandos/upload-excel/', upload_excel_comandos, name='upload_excel_comandos'),
     path('api/', include(router.urls)),
-    path('politicas_uso_app/', views.politicas_uso_app, name='politicas'),
+    path('politicas_uso_app/', views.politicas_uso_app, name='politicas_uso_app'),
 
 ]
 
