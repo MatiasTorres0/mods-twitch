@@ -108,3 +108,35 @@ class Anuncios(models.Model):
     def __str__(self):
         return self.mensaje
 
+class Notas_Mods(models.Model):
+    Titulo = models.CharField(max_length=150)
+    contenido = models.CharField(max_length=20000)
+    fecha = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.Titulo
+
+class Stream_WWE(models.Model):
+    fecha_stream = models.DateTimeField()
+    
+    def __str__(self):
+        return f"Stream WWE {self.fecha_stream.strftime('%Y-%m-%d')}"
+
+class Combate_WWE(models.Model):
+    RESULTADOS = (
+        ('VICTORIA', 'Victoria'),
+        ('DERROTA', 'Derrota'),
+        ('EMPATE', 'Empate'),
+        ('NO_CONTEST', 'Sin Decisión'),
+    )
+    
+    stream = models.ForeignKey(Stream_WWE, on_delete=models.CASCADE, related_name='combates')
+    luchador_1 = models.CharField(max_length=100)
+    luchador_2 = models.CharField(max_length=100)
+    resultado = models.CharField(max_length=20, choices=RESULTADOS)
+    orden_combate = models.PositiveIntegerField(help_text="Orden del combate en el stream")
+    
+    class Meta:
+        ordering = ['stream', 'orden_combate']
+    
+    def __str__(self):
+        return f"{self.luchador_1} vs {self.luchador_2} - {self.get_resultado_display()}"

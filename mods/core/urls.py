@@ -44,6 +44,8 @@ urlpatterns = [
     path('comandos/upload-excel/', upload_excel_comandos, name='upload_excel_comandos'),
     path('api/', include(router.urls)),
     path('politicas_uso_app/', views.politicas_uso_app, name='politicas_uso_app'),
+    path('notas_mods/', views.notas_mods, name='notas_mods'),
+    path('agregar_combate/', views.agregar_combate, name='agregar_combate'),
 
 ]
 

@@ -4,7 +4,7 @@ from django.contrib.auth import login as auth_login, authenticate # Import login
 from django.contrib import messages  # Asegúrate de importar messages
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
-from .forms import ComandoForm, ModeradorRegistroForm, AnunciosForm
+from .forms import ComandoForm, ModeradorRegistroForm, AnunciosForm, Notas_ModsForms, Stream_WWEForms, Combate_WWEForms
 from .models import Moderador, Comando # Asegúrate de que Comando esté importado
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from openpyxl import load_workbook
@@ -275,3 +275,36 @@ def agregar_anuncio(request):
 
 def politicas_uso_app(request):
     return render(request, 'core/politicas_uso_app.html')
+
+def notas_mods(request):
+    if request.method == 'POST':
+        form = Notas_ModsForms(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('notas_mods')
+    else:
+        form = Notas_ModsForms()
+    return render(request, 'dashboard/notas_mods.html', {'form': form})
+
+def agregar_combate(request):
+    data = {
+        'form_stream': Stream_WWEForms(),
+        'form_combate': Combate_WWEForms()
+    }
+    
+    if request.method == 'POST':
+        if 'submit_stream' in request.POST:
+            form_stream = Stream_WWEForms(request.POST)
+            if form_stream.is_valid():
+                form_stream.save()
+                return redirect('agregar_combate')
+            data['form_stream'] = form_stream
+            
+        elif 'submit_combate' in request.POST:
+            form_combate = Combate_WWEForms(request.POST)
+            if form_combate.is_valid():
+                form_combate.save()
+                return redirect('agregar_combate')
+            data['form_combate'] = form_combate
+            
+    return render(request, 'dashboard/agregar_combate.html',{'form_stream': form_stream})

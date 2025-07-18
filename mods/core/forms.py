@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Comando, Moderador, Anuncios  # Añadido Anuncios
+from .models import Comando, Moderador, Anuncios, Notas_Mods, Stream_WWE, Combate_WWE  # Añadido Anuncios
+
 
 class ModeradorRegistroForm(UserCreationForm):
     class Meta:
@@ -64,3 +65,46 @@ class AnunciosForm(forms.ModelForm):
         self.fields['fecha_inicio'].label = "Fecha de Inicio"
         self.fields['fecha_fin'].label = "Fecha de Fin"
         self.fields['activo'].label = "¿Activo?"
+
+class Notas_ModsForms(forms.ModelForm):
+    class Meta:
+        model = Notas_Mods
+        fields = ['Titulo', 'contenido']
+        widgets = {
+            'Titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'contenido': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['Titulo'].label = "Título"
+        self.fields['contenido'].label = "Contenido"
+
+class Stream_WWEForms(forms.ModelForm):
+    class Meta:
+        model = Stream_WWE
+        fields = ['fecha_stream']
+        widgets = {
+            'fecha_stream': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['fecha_stream'].label = "Fecha del Stream"
+
+class Combate_WWEForms(forms.ModelForm):
+    class Meta:
+        model = Combate_WWE
+        fields = ['stream', 'luchador_1', 'luchador_2', 'resultado', 'orden_combate']
+        widgets = {
+            'stream': forms.Select(attrs={'class': 'form-control'}),
+            'luchador_1': forms.TextInput(attrs={'class': 'form-control'}),
+            'luchador_2': forms.TextInput(attrs={'class': 'form-control'}),
+            'resultado': forms.Select(attrs={'class': 'form-control'}),
+            'orden_combate': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['stream'].label = "Stream"
+        self.fields['luchador_1'].label = "Luchador 1"
+        self.fields['luchador_2'].label = "Luchador 2"
+        self.fields['resultado'].label = "Resultado"
+        self.fields['orden_combate'].label = "Orden del Combate"
