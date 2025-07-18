@@ -287,24 +287,35 @@ def notas_mods(request):
     return render(request, 'dashboard/notas_mods.html', {'form': form})
 
 def agregar_combate(request):
-    data = {
-        'form_stream': Stream_WWEForms(),
-        'form_combate': Combate_WWEForms()
-    }
+    # Initialize forms
+    form_stream = Stream_WWEForms()
+    form_combate = Combate_WWEForms()
     
     if request.method == 'POST':
         if 'submit_stream' in request.POST:
             form_stream = Stream_WWEForms(request.POST)
             if form_stream.is_valid():
                 form_stream.save()
+                messages.success(request, 'Stream WWE agregado correctamente')
                 return redirect('agregar_combate')
-            data['form_stream'] = form_stream
-            
+            else:
+                messages.error(request, 'Error al agregar el Stream WWE')
+                
         elif 'submit_combate' in request.POST:
             form_combate = Combate_WWEForms(request.POST)
             if form_combate.is_valid():
                 form_combate.save()
+                messages.success(request, 'Combate WWE agregado correctamente')
                 return redirect('agregar_combate')
-            data['form_combate'] = form_combate
-            
-    return render(request, 'dashboard/agregar_combate.html',{'form_stream': form_stream})
+            else:
+                messages.error(request, 'Error al agregar el Combate WWE')
+    
+    # Create context with both forms
+    context = {
+        'form_stream': form_stream,
+        'form_combate': form_combate
+    }
+    
+    return render(request, 'dashboard/agregar_combate.html', context)
+def seccion_agregar(request):
+    return render(request, 'dashboard/seccion_agregar.html')

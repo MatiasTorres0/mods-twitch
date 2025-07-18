@@ -46,6 +46,7 @@ urlpatterns = [
     path('politicas_uso_app/', views.politicas_uso_app, name='politicas_uso_app'),
     path('notas_mods/', views.notas_mods, name='notas_mods'),
     path('agregar_combate/', views.agregar_combate, name='agregar_combate'),
+    path('seccion_agregar/', views.seccion_agregar, name='seccion_agregar'),
 
 ]
 
