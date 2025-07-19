@@ -134,6 +134,12 @@ class Stream_WWE(models.Model):
         return f"Stream WWE {self.fecha_stream.strftime('%Y-%m-%d')}"
 
 class Combate_WWE(models.Model):
+    TIPO_COMBATE = (
+        ('INDIVIDUAL', 'Individual'),
+        ('PAREJAS', 'Parejas'),
+        ('ESPECIAL', 'Especial'),
+    )
+    
     RESULTADOS = (
         ('VICTORIA', 'Victoria'),
         ('DERROTA', 'Derrota'),
@@ -142,13 +148,21 @@ class Combate_WWE(models.Model):
     )
     
     stream = models.ForeignKey(Stream_WWE, on_delete=models.CASCADE, related_name='combates')
-    luchador_1 = models.CharField(max_length=100)
-    luchador_2 = models.CharField(max_length=100)
-    resultado = models.CharField(max_length=20, choices=RESULTADOS)
+    tipo_combate = models.CharField(max_length=20, choices=TIPO_COMBATE, default='INDIVIDUAL')  # Nuevo campo
+    luchador_1 = models.CharField(max_length=100, blank=True, null=True)
+    luchador_2 = models.CharField(max_length=100, blank=True, null=True)
+    luchador_3 = models.CharField(max_length=100, blank=True, null=True)  # Nuevo campo
+    luchador_4 = models.CharField(max_length=100, blank=True, null=True)  # Nuevo campo
+    resultado = models.CharField(max_length=20, choices=RESULTADOS, default='NO_CONTEST')
     orden_combate = models.PositiveIntegerField(help_text="Orden del combate en el stream")
     
     class Meta:
         ordering = ['stream', 'orden_combate']
     
     def __str__(self):
-        return f"{self.luchador_1} vs {self.luchador_2} - {self.get_resultado_display()}"
+        if self.tipo_combate == 'PAREJAS':
+            return f"{self.luchador_1} & {self.luchador_2} vs {self.luchador_3} & {self.luchador_4}"
+        elif self.tipo_combate == 'ESPECIAL':
+            return f"Evento Especial: {self.luchador_1}"
+        else:
+            return f"{self.luchador_1} vs {self.luchador_2}"
