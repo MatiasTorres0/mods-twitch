@@ -5,7 +5,8 @@ from django.contrib import messages  # Asegúrate de importar messages
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from .forms import ComandoForm, ModeradorRegistroForm, AnunciosForm, Notas_ModsForms, Stream_WWEForms, Combate_WWEForms
-from .models import Moderador, Comando # Asegúrate de que Comando esté importado
+from .models import Moderador, Comando, Notas_Mods # Asegúrate de que Comando esté importado
+
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from openpyxl import load_workbook
 from rest_framework import viewsets
@@ -319,3 +320,39 @@ def agregar_combate(request):
     return render(request, 'dashboard/agregar_combate.html', context)
 def seccion_agregar(request):
     return render(request, 'dashboard/seccion_agregar.html')
+
+def ver_notas(request):
+    notas = Notas_Mods.objects.all()
+    return render(request, 'dashboard/ver_notas.html', {'notas': notas})
+
+def subir_excel_combate(request):
+    if request.method == 'POST':
+        excel_file = request.FILES.get('excel_file')
+        
+        if not excel_file.name.endswith('.xlsx'):
+            messages.error(request, 'Formato de archivo no válido')
+            return redirect('agregar_combate')
+
+        try:
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                if len(row) < 3:  # Cambiado a 3 columnas
+                    messages.warning(request, f'Fila inválida: {row}')
+                    continue
+                
+                # Eliminado el bucle for row in rows redundante
+                Combate_WWE.objects.create(
+                    nombre_combate=row[0],
+                    nombre_stream=row[1],  # Segunda columna como categoría
+                    fecha_combate=row[2],   # Tercera columna como descripción
+                )
+                
+            messages.success(request, f'{sheet.max_row -1} combates importados!')
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+        
+        return redirect('agregar_combate')
+    
+    return render(request, 'dashboard/agregar_combate_excel.html')

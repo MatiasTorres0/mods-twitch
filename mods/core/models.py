@@ -109,8 +109,20 @@ class Anuncios(models.Model):
         return self.mensaje
 
 class Notas_Mods(models.Model):
+    CATEGORIA = (
+        ('SUGERENCIAS', 'SUGERENCIAS'),
+        ('BUGS', 'BUGS'),
+        ('OTROS', 'OTROS'),
+    )
+    PRIORIDAD = (
+        ('ALTA', 'ALTA'),
+        ('MEDIA', 'MEDIA'),
+        ('BAJA', 'BAJA'),
+    )
     Titulo = models.CharField(max_length=150)
     contenido = models.CharField(max_length=20000)
+    categoria = models.CharField(max_length=100, choices=CATEGORIA, default='OTROS')
+    prioridad = models.CharField(max_length=100, choices=PRIORIDAD, default='BAJA')
     fecha = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return self.Titulo

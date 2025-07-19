@@ -47,6 +47,7 @@ urlpatterns = [
     path('notas_mods/', views.notas_mods, name='notas_mods'),
     path('agregar_combate/', views.agregar_combate, name='agregar_combate'),
     path('seccion_agregar/', views.seccion_agregar, name='seccion_agregar'),
-
+    path('ver_notas/', views.ver_notas, name='ver_notas'),
+    path('subir_excel_combate/', views.subir_excel_combate, name='subir_excel_combate'),
 ]
 

@@ -69,15 +69,19 @@ class AnunciosForm(forms.ModelForm):
 class Notas_ModsForms(forms.ModelForm):
     class Meta:
         model = Notas_Mods
-        fields = ['Titulo', 'contenido']
+        fields = ['Titulo', 'contenido', 'categoria', 'prioridad']
         widgets = {
             'Titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'contenido': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'prioridad': forms.Select(attrs={'class': 'form-control'}),
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['Titulo'].label = "Título"
         self.fields['contenido'].label = "Contenido"
+        self.fields['categoria'].label = "Categoría"
+        self.fields['prioridad'].label = "Prioridad"
 
 class Stream_WWEForms(forms.ModelForm):
     class Meta:
