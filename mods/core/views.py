@@ -186,6 +186,37 @@ def editar_comando(request, comando_id):
             
     return render(request, 'dashboard/editar_comando.html', data)
 
+def editar_nota(request, nota_id):
+    # Obtener la nota a editar
+    nota = Notas_Mods.objects.get(id=nota_id)
+    data = {
+        'form': Notas_ModsForms(instance=nota)
+    }
+
+    if request.method == 'POST':
+        form = Notas_ModsForms(data=request.POST, instance = nota)
+        if form.is_valid():
+            form.save()
+            data['mensaje'] = "La nota ha sido modificada con éxito"
+            data['form'] = form
+            return redirect('ver_notas') # Assuming 'ver_notas' is the correct URL name to redirect to after editing
+        else:
+            data['form'] = form
+            data['mensaje'] = "Error al modificar la nota"
+            
+    return render(request, 'dashboard/editar_nota.html', data)
+
+def eliminar_nota(request, nota_id):
+    # Obtener el comando a eliminar
+    nota = Notas_Mods.objects.get(id=nota_id)
+
+    # Eliminar el comando
+    nota.delete()
+
+    # Redirigir a la página de comandos o a donde desees
+    return redirect('ver_notas')
+
+
 def eliminar_comando(request, comando_id):
     # Obtener el comando a eliminar
     comando = Comando.objects.get(id=comando_id)

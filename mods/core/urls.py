@@ -53,5 +53,7 @@ urlpatterns = [
     path('ver_notas/', views.ver_notas, name='ver_notas'),
     path('subir_excel_combate/', views.subir_excel_combate, name='subir_excel_combate'),
     path('ver_combates/', views.ver_combates, name='ver_combates'),
+    path('editar_nota/<int:nota_id>/', views.editar_nota, name='editar_nota'),
+    path('eliminar_nota/<int:nota_id>/', views.eliminar_nota, name='eliminar_nota'),
 ]
 
