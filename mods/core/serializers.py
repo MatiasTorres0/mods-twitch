@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.core.validators import EmailValidator
-from .models import Comando, Moderador
+from .models import Comando, Moderador, Combate_WWE, Notas_Mods
+
 
 class ComandoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,3 +22,4 @@ class ModeradorSerializer(serializers.ModelSerializer):
             'email': {'required': True, 'validators': [EmailValidator()]},
             'password': {'write_only': True, 'required': True, 'style': {'input_type': 'password'}}
         }
+

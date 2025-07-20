@@ -49,5 +49,6 @@ urlpatterns = [
     path('seccion_agregar/', views.seccion_agregar, name='seccion_agregar'),
     path('ver_notas/', views.ver_notas, name='ver_notas'),
     path('subir_excel_combate/', views.subir_excel_combate, name='subir_excel_combate'),
+    path('ver_combates/', views.ver_combates, name='ver_combates'),
 ]
 

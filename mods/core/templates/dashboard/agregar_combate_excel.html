@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Panel de Moderadores – Importar Combates</title>
+    {% load static %}
+
+    <!-- Fuentes e íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00C566;
+            --primary-dark: #009E4A;
+            --primary-light: #E6F7EF;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5F6368;
+            --border: #E0E0E0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --error: #FF4D4F;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+        }
+
+        .container {
+            background-color: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            max-width: 720px;
+            width: 100%;
+        }
+
+        h2 {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .import-card {
+            background-color: var(--primary-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 2px dashed var(--primary);
+        }
+
+        .import-card i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .import-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .import-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-field-container {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        input[type="datetime-local"],
+        input[type="file"] {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background-color: var(--surface);
+        }
+
+        input[type="datetime-local"]:focus,
+        input[type="file"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 197, 102, 0.15);
+            outline: none;
+        }
+
+        .helptext {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            background-color: var(--surface);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 150px;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .file-input-label i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .file-input-label span {
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            word-break: break-all;
+            text-align: center;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        button[type="submit"] {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 197, 102, 0.2);
+        }
+
+        button[type="submit"]:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 197, 102, 0.25);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background-color: var(--primary-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .instructions h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instructions ul {
+            padding-left: 1.5rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .instructions li strong {
+            color: var(--text-primary);
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 2rem;
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .messages li {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .messages li.success {
+            background-color: var(--primary);
+        }
+
+        .messages li.error {
+            background-color: var(--error);
+        }
+
+        .messages li.warning {
+            background-color: #FFC107;
+            color: #1A1A1A;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.75rem;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            h2 {
+                font-size: 1.35rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            .import-card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            <div>
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            <button type="button" class="close-btn" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="header">
+        <h1>Panel de Combates WWE</h1>
+        <p>Importa combates directamente desde un archivo Excel</p>
+    </div>
+
+    <div class="container">
+        <h2>Importar Combates desde Excel</h2>
+        
+        <div class="import-card">
+            <i class="fas fa-file-excel"></i>
+            <h3>Sube tu archivo Excel</h3>
+            <p>Formato compatible: .xlsx (Excel)</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            <!-- Campo para la fecha del stream -->
+            <div class="form-field-container">
+                <label for="fecha_stream">
+                    <i class="fas fa-calendar-alt"></i> Fecha del Stream
+                </label>
+                <input type="datetime-local" id="fecha_stream" name="fecha_stream" required>
+                <small class="helptext">Selecciona la fecha y hora del evento WWE</small>
+            </div>
+            
+            <!-- Campo para el archivo Excel -->
+            <div class="form-field-container">
+                <label for="excel_file">
+                    <i class="fas fa-file-upload"></i> Archivo Excel
+                </label>
+                
+                <div class="file-input-wrapper">
+                    <div class="file-input-label" id="file-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Haz clic para seleccionar un archivo Excel</span>
+                        <span class="file-name" id="file-name">Ningún archivo seleccionado</span>
+                    </div>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx" required>
+                </div>
+                <small class="helptext">Solo se aceptan archivos .xlsx (Excel)</small>
+            </div>
+            
+            <button type="submit">
+                <i class="fas fa-file-import"></i> Importar Combates
+            </button>
+        </form>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Instrucciones para el formato Excel</h3>
+            <ul>
+                <li>El archivo debe mantener la estructura de columnas original</li>
+                <li><strong>Columna A:</strong> Categoría/Evento (ej. Lucha Femenina, Lucha en Parejas)</li>
+                <li><strong>Columna B y D:</strong> Nombres de los participantes principales</li>
+                <li><strong>Columna E y F:</strong> Participantes adicionales para combates por parejas</li>
+                <li>Las filas con "Evento Especial" se importarán correctamente</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Actualizar nombre de archivo seleccionado
+        document.getElementById('excel_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+            document.getElementById('file-name').textContent = fileName;
+            
+            if (fileName !== 'Ningún archivo seleccionado') {
+                document.getElementById('file-label').style.borderColor = '#00C566';
+                document.getElementById('file-label').style.backgroundColor = '#E6F7EF';
+            }
+        });
+        
+        // Configurar fecha mínima (hoy)
+        const now = new Date();
+        const timezoneOffset = now.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(now - timezoneOffset)).toISOString().slice(0, 16);
+        document.getElementById('fecha_stream').min = localISOTime;
+        
+        // Animación para cerrar mensajes
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.querySelectorAll('.messages li').forEach(function(message) {
+                    message.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateY(-10px)';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 500);
+                });
+            }, 5000);
+        });
+        
+        // Cerrar mensajes al hacer clic en el botón
+        document.querySelectorAll('.close-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('li').remove();
+            });
+        });
+    </script>
+</body>
+</html>

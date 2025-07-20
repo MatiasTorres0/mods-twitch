@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Combates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 2rem;
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table thead th {
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 15px;
+        }
+        .table tbody td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+        .table tbody tr:hover {
+            background-color: #f5f5f5;
+            transition: background-color 0.3s ease;
+        }
+        h1 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Combates</h1>
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Stream</th>
+                        <th>Tipo Combate</th>
+                        <th>Luchador 1</th>
+                        <th>Luchador 2</th>
+                        <th>Luchador 3</th>
+                        <th>Luchador 4</th>
+                        <th>Resultado</th>
+                        <th>Orden Combate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for combate in combates %}
+                    <tr>
+                        <td><span class="badge bg-primary">{{ combate.stream }}</span></td>
+                        <td>{{ combate.tipo_combate }}</td>
+                        <td>{{ combate.luchador_1 }}</td>
+                        <td>{{ combate.luchador_2 }}</td>
+                        <td>{{ combate.luchador_3 }}</td>
+                        <td>{{ combate.luchador_4 }}</td>
+                        <td><span class="badge bg-success">{{ combate.resultado }}</span></td>
+                        <td><span class="badge bg-secondary">{{ combate.orden_combate }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -5,8 +5,11 @@ from django.contrib import messages  # Asegúrate de importar messages
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from .forms import ComandoForm, ModeradorRegistroForm, AnunciosForm, Notas_ModsForms, Stream_WWEForms, Combate_WWEForms
-from .models import Moderador, Comando, Notas_Mods # Asegúrate de que Comando esté importado
+from .models import Moderador, Comando, Notas_Mods, Stream_WWE, Combate_WWE # Asegúrate de que Comando esté importado
 
+from django.contrib import messages
+from django.db import transaction
+from openpyxl import load_workbook
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from openpyxl import load_workbook
 from rest_framework import viewsets
@@ -328,31 +331,85 @@ def ver_notas(request):
 def subir_excel_combate(request):
     if request.method == 'POST':
         excel_file = request.FILES.get('excel_file')
+        fecha_stream = request.POST.get('fecha_stream')
         
         if not excel_file.name.endswith('.xlsx'):
             messages.error(request, 'Formato de archivo no válido')
             return redirect('agregar_combate')
+        
+        if not fecha_stream:
+            messages.error(request, 'Debe especificar la fecha del stream')
+            return redirect('agregar_combate')
 
         try:
-            wb = load_workbook(excel_file)
-            sheet = wb.active
-            
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                if len(row) < 3:  # Cambiado a 3 columnas
-                    messages.warning(request, f'Fila inválida: {row}')
-                    continue
-                
-                # Eliminado el bucle for row in rows redundante
-                Combate_WWE.objects.create(
-                    nombre_combate=row[0],
-                    nombre_stream=row[1],  # Segunda columna como categoría
-                    fecha_combate=row[2],   # Tercera columna como descripción
+            # Crear el stream principal
+            with transaction.atomic():
+                stream_instance = Stream_WWE.objects.create(
+                    fecha_stream=fecha_stream
                 )
                 
-            messages.success(request, f'{sheet.max_row -1} combates importados!')
+                wb = load_workbook(excel_file)
+                sheet = wb.active
+                
+                for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=1):
+                    # Saltar filas vacías o encabezados
+                    if not row[0] or row[0] == "Categoría/Evento":
+                        continue
+                    
+                    categoria = row[0]
+                    
+                    # Determinar tipo de combate
+                    if "Parejas" in categoria:
+                        tipo_combate = 'PAREJAS'
+                    elif "Especial" in categoria:
+                        tipo_combate = 'ESPECIAL'
+                    else:
+                        tipo_combate = 'INDIVIDUAL'
+                    
+                    # Limpiar y obtener participantes válidos
+                    participantes = []
+                    for cell in row[1:]:
+                        if cell and str(cell).strip() and str(cell).strip().lower() not in ['vs', 'y']:
+                            participantes.append(str(cell).strip())
+                    
+                    # Crear instancia de combate
+                    combate = Combate_WWE(
+                        stream=stream_instance,
+                        tipo_combate=tipo_combate,
+                        resultado='NO_CONTEST',
+                        orden_combate=idx
+                    )
+                    
+                    # Asignar participantes según el tipo
+                    if tipo_combate == 'INDIVIDUAL' and len(participantes) >= 2:
+                        combate.luchador_1 = participantes[0]
+                        combate.luchador_2 = participantes[1]
+                    elif tipo_combate == 'PAREJAS' and len(participantes) >= 4:
+                        combate.luchador_1 = participantes[0]
+                        combate.luchador_2 = participantes[1]
+                        combate.luchador_3 = participantes[2]
+                        combate.luchador_4 = participantes[3]
+                    elif tipo_combate == 'ESPECIAL' and participantes:
+                        combate.luchador_1 = participantes[0]
+                    else:
+                        continue  # Saltar filas inválidas
+                    
+                    combate.save()
+                
+                messages.success(request, f'¡Stream y {idx-1} combates importados correctamente!')
+        
         except Exception as e:
             messages.error(request, f'Error: {str(e)}')
         
         return redirect('agregar_combate')
     
     return render(request, 'dashboard/agregar_combate_excel.html')
+
+def ver_combates(request):
+    combates = Combate_WWE.objects.all()
+    return render(request, 'dashboard/ver_combates.html', {'combates': combates})
+
+
+class ComandoViewSet(viewsets.ModelViewSet):
+    queryset = Comando.objects.all()
+    serializer_class = ComandoSerializer
