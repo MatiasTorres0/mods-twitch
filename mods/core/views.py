@@ -13,7 +13,8 @@ from openpyxl import load_workbook
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from openpyxl import load_workbook
 from rest_framework import viewsets
-from .serializers import ComandoSerializer, ModeradorSerializer
+from .serializers import ComandoSerializer, ModeradorSerializer, NotasSerializer, Combate_WWESerializer
+
 
 
 class ModeradorRegistroView(CreateView):
@@ -410,6 +411,10 @@ def ver_combates(request):
     return render(request, 'dashboard/ver_combates.html', {'combates': combates})
 
 
-class ComandoViewSet(viewsets.ModelViewSet):
-    queryset = Comando.objects.all()
-    serializer_class = ComandoSerializer
+class NotasViewSet(viewsets.ModelViewSet):
+    queryset = Notas_Mods.objects.all()
+    serializer_class = NotasSerializer
+
+class CombateViewSet(viewsets.ModelViewSet):
+    queryset = Combate_WWE.objects.all()
+    serializer_class = Combate_WWESerializer

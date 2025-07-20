@@ -11,6 +11,9 @@ from django.urls.conf import include
 router = routers.DefaultRouter()
 router.register('comandos', views.ComandoViewSet)
 router.register('moderadores', views.ModeradorViewSet)
+router.register('notas', views.NotasViewSet)
+router.register('combates', views.CombateViewSet)
+
 
 urlpatterns = [
     path('', views.index, name='index'),
